@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 const path = require('path')
+const logger = require('./utils/logger')
 
 dotenv.config()
 const app = express()
@@ -66,7 +67,7 @@ app.use((req, res) => {
 })
 
 // Globalny error handler - musi być na końcu, po wszystkich middleware i routes
-app.use((err, req, res) => {
+app.use((err, req, res, _next) => {
   // 1. SPECJALNE PRZYPADKI (istniejąca logika dla Multera)
   if (err && err.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({ message: 'Za duży plik. Limit 5MB.' })
@@ -81,7 +82,7 @@ app.use((err, req, res) => {
 
   // Development - szczegółowe logi
   if (process.env.NODE_ENV === 'development') {
-    console.error('ERROR 💥:', err)
+    logger.error('ERROR 💥:', err)
     return res.status(err.statusCode).json({
       status: err.status,
       error: err,
@@ -99,7 +100,7 @@ app.use((err, req, res) => {
     })
   } else {
     // Nieznane błędy programistyczne - nie pokazujemy szczegółów
-    console.error('ERROR 💥:', err)
+    logger.error('ERROR 💥:', err)
     return res.status(500).json({
       status: 'error',
       message: 'Coś poszło nie tak!'
@@ -110,15 +111,15 @@ app.use((err, req, res) => {
 // Połączenie z MongoDB i start
 mongoose.connect(MONGO_URI, {})
   .then(() => {
-    console.log('✅ Połączono z MongoDB')
+    logger.info('✅ Połączono z MongoDB')
 
     const conn = mongoose.connection
-    console.log(`📦 Baza: ${conn.name}`)
-    console.log(`🌐 Host: ${conn.host}`)
+    logger.info(`📦 Baza: ${conn.name}`)
+    logger.info(`🌐 Host: ${conn.host}`)
 
-    app.listen(PORT, () => console.log(`🚀 Serwer działa na porcie ${PORT}`))
+    app.listen(PORT, () => logger.info(`🚀 Serwer działa na porcie ${PORT}`))
   })
   .catch((err) => {
-    console.error('❌ Błąd połączenia z MongoDB:', err)
+    logger.error('❌ Błąd połączenia z MongoDB:', err)
     process.exit(1)
   })

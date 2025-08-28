@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const userService = require('../services/userService');
 
 // GET /api/users/profile
@@ -7,7 +8,7 @@ const getProfile = async (req, res) => {
     const user = await userService.getProfile(req.user._id);
     return res.json(user);
   } catch (err) {
-    console.error('Błąd getProfile:', err);
+    logger.error('Błąd getProfile:', err);
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
@@ -19,7 +20,7 @@ const updateProfile = async (req, res) => {
     const user = await userService.updateProfile(req.user._id, req.body);
     return res.json({ message: 'Profil zaktualizowany', user });
   } catch (err) {
-    console.error('Błąd updateProfile:', err);
+    logger.error('Błąd updateProfile:', err);
     if (err.message.includes('Nazwa użytkownika')) {
       return res.status(400).json({ message: err.message });
     }
@@ -35,7 +36,7 @@ const changePassword = async (req, res) => {
     await userService.changePassword(req.user._id, oldPassword, newPassword);
     return res.json({ message: 'Hasło zostało zmienione.' });
   } catch (err) {
-    console.error('Błąd changePassword:', err);
+    logger.error('Błąd changePassword:', err);
     if (err.message.includes('Stare hasło') || err.message.includes('Nowe hasło')) {
       return res.status(400).json({ message: err.message });
     }
@@ -49,7 +50,7 @@ const listUsers = async (req, res) => {
     const users = await userService.listUsers();
     return res.json(users);
   } catch (err) {
-    console.error('Błąd listUsers:', err);
+    logger.error('Błąd listUsers:', err);
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
@@ -62,7 +63,7 @@ const changeRole = async (req, res) => {
     const user = await userService.changeRole(id, role);
     return res.json({ message: 'Rola zaktualizowana.', user });
   } catch (err) {
-    console.error('Błąd changeRole:', err);
+    logger.error('Błąd changeRole:', err);
     if (err.message.includes('Rola') || err.message.includes('Nieprawidłowa')) {
       return res.status(400).json({ message: err.message });
     }
@@ -77,7 +78,7 @@ const deleteUser = async (req, res) => {
     await userService.deleteUser(id);
     return res.status(204).end();
   } catch (err) {
-    console.error('Błąd deleteUser:', err);
+    logger.error('Błąd deleteUser:', err);
     if (err.message.includes('Użytkownik nie istnieje')) {
       return res.status(404).json({ message: err.message });
     }

@@ -1,4 +1,5 @@
 // controllers/adminController.js v.2
+const logger = require('../utils/logger');
 const bcrypt = require("bcryptjs");
 const PendingUser = require("../models/PendingUser");
 const User = require("../models/User");
@@ -63,7 +64,7 @@ const approveUser = async (req, res, next) => {
             const tpl = approvedUserEmail({ username: user.username, email: user.email });
             await sendMail({ to: user.email, subject: tpl.subject, text: tpl.text, html: tpl.html });
         } catch (mailErr) {
-            console.warn("approveUser: mail send failed:", mailErr?.message || mailErr);
+            logger.warn("approveUser: mail send failed:", mailErr?.message || mailErr);
         }
 
         return res.json({ message: "Użytkownik zatwierdzony i dodany do systemu.", userId: user._id });
@@ -84,7 +85,7 @@ const rejectUser = async (req, res, next) => {
             const tpl = rejectedUserEmail({ username: pending.username, email: pending.email });
             await sendMail({ to: pending.email, subject: tpl.subject, text: tpl.text, html: tpl.html });
         } catch (mailErr) {
-            console.warn("rejectUser: mail send failed:", mailErr?.message || mailErr);
+            logger.warn("rejectUser: mail send failed:", mailErr?.message || mailErr);
         }
 
         await pending.deleteOne();

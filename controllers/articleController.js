@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const articleService = require('../services/articleService');
 const fs = require('fs');
 const path = require('path');
@@ -43,7 +44,7 @@ const createArticle = async (req, res) => {
         fs.unlink(full, () => {});
       }
     }
-    console.error('Błąd tworzenia artykułu:', error);
+    logger.error('Błąd tworzenia artykułu:', error);
     if (error.message.includes('Tytuł musi mieć') || error.message.includes('Treść musi mieć') || error.message.includes('jest wymagana')) {
       return res.status(400).json({ message: error.message });
     }
@@ -62,7 +63,7 @@ const getArticles = async (req, res) => {
     const result = await articleService.getArticles(page, limit, search, sort);
     return res.json(result);
   } catch (error) {
-    console.error('Błąd pobierania artykułów:', error);
+    logger.error('Błąd pobierania artykułów:', error);
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
@@ -74,7 +75,7 @@ const getArticleById = async (req, res) => {
     const article = await articleService.getArticleById(id);
     return res.status(200).json(article);
   } catch (error) {
-    console.error('Błąd pobierania artykułu:', error);
+    logger.error('Błąd pobierania artykułu:', error);
     if (error.message === 'Nie znaleziono artykułu') {
       return res.status(404).json({ message: error.message });
     }
@@ -99,7 +100,7 @@ const updateArticle = async (req, res) => {
 
     return res.json({ message: 'Artykuł zaktualizowany', article: result });
   } catch (error) {
-    console.error('Błąd aktualizacji artykułu:', error);
+    logger.error('Błąd aktualizacji artykułu:', error);
     if (error.message === 'Artykuł nie znaleziony') {
       return res.status(404).json({ message: error.message });
     }
@@ -120,7 +121,7 @@ const deleteArticle = async (req, res) => {
     await articleService.deleteArticle(id, req.user._id, req.user.role);
     return res.status(204).end();
   } catch (error) {
-    console.error('Błąd usuwania artykułu:', error);
+    logger.error('Błąd usuwania artykułu:', error);
     if (error.message === 'Artykuł nie istnieje') {
       return res.status(404).json({ message: error.message });
     }
@@ -138,7 +139,7 @@ const toggleLikeArticle = async (req, res) => {
     const result = await articleService.toggleLikeArticle(id, req.user._id);
     return res.json(result);
   } catch (error) {
-    console.error('Błąd toggle lajka artykułu:', error);
+    logger.error('Błąd toggle lajka artykułu:', error);
     if (error.message === 'Artykuł nie znaleziony') {
       return res.status(404).json({ message: error.message });
     }

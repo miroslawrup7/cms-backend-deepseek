@@ -1,3 +1,4 @@
+const logger = require('../utils/logger');
 const Article = require('../models/Article');
 const Comment = require('../models/Comment');
 const fs = require('fs');
@@ -165,7 +166,7 @@ const updateArticle = async (articleId, updateData, userId, userRole, files) => 
     if (full.startsWith(UPLOADS_DIR)) {
       fs.unlink(full, (err) => {
         if (err && err.code !== 'ENOENT') {
-          console.error(`Błąd usuwania pliku: ${full}`, err);
+          logger.error(`Błąd usuwania pliku: ${full}`, err);
         }
       });
     }
@@ -215,7 +216,7 @@ const deleteArticle = async (articleId, userId, userRole) => {
     if (full.startsWith(UPLOADS_DIR)) {
       fs.unlink(full, (err) => {
         if (err && err.code !== 'ENOENT') {
-          console.error(`Błąd usuwania pliku ${full}:`, err);
+          logger.error(`Błąd usuwania pliku ${full}:`, err);
         }
       });
     }
