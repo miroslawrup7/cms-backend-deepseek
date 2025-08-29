@@ -1,15 +1,17 @@
 // jest.config.js
 module.exports = {
-  testEnvironment: 'node', // Środowisko dla Node.js (a nie przeglądarki)
-  collectCoverageFrom: [ // Z których plików zbierać informacje o "pokryciu testami"
+  testEnvironment: 'node',
+  // DODAJ tę linię: Ustawia ścieżkę do pliku env dla testów
+  setupFiles: ['<rootDir>/jest.setup.js'], // Ta linia mówi Jest, aby przed testami uruchomił plik `jest.setup.js`
+  collectCoverageFrom: [
     'services/**/*.js',
     'controllers/**/*.js',
     'utils/**/*.js',
-    '!**/node_modules/**', // wyklucz
+    '!**/node_modules/**',
   ],
-  coverageThreshold: { // Minimalny próg % pokrycia testowego, który musi być spełniony
+  coverageThreshold: {
     global: {
-      branches: 0, // Na początek ustawmy 0, potem możemy zwiększać
+      branches: 0,
       functions: 0,
       lines: 0,
       statements: 0,
