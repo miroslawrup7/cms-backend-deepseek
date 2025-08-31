@@ -9,7 +9,6 @@ const bcrypt = require('bcryptjs');
 describe('Integracja: Endpointy Artykułów', () => {
   let authToken;
   let testUser;
-  let testArticle;
 
   beforeAll(async () => {
     await startServer();
@@ -121,7 +120,7 @@ describe('Integracja: Endpointy Artykułów', () => {
         .set('Cookie', authToken)
         .send({
           title: 'Updated Title',
-          content: 'Updated content',
+          content: 'This is updated content that is longer than 20 characters', // Minimum 20 znaków
         });
 
       expect(response.status).toBe(200);

@@ -1,4 +1,4 @@
-// jest.config.js
+// jest.config.js (poprawiona wersja)
 module.exports = {
   testEnvironment: 'node',
   setupFiles: ['<rootDir>/jest.setup.js'],
@@ -18,6 +18,9 @@ module.exports = {
   },
   testPathIgnorePatterns: [
     '/node_modules/',
-    '__tests__/integration/.+', // ignoruj puste pliki
+    // USUŃ lub ZMIEŃ tę linię:
+    // '__tests__/integration/.+',
   ],
+  // Możesz dodać jawną definicję patternów testowych:
+  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.spec.js'],
 };
