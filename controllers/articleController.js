@@ -95,7 +95,7 @@ const updateArticle = async (req, res) => {
       updateData,
       req.user._id,
       req.user.role,
-      req.files
+      req.files,
     );
 
     return res.json({ message: 'Artykuł zaktualizowany', article: result });

@@ -41,7 +41,12 @@ const updateComment = async (req, res) => {
   try {
     const commentId = req.params.id;
     const rawText = req.body?.text ?? '';
-    const comment = await commentService.updateComment(commentId, req.user._id, req.user.role, rawText);
+    const comment = await commentService.updateComment(
+      commentId,
+      req.user._id,
+      req.user.role,
+      rawText,
+    );
     return res.json(comment);
   } catch (error) {
     logger.error('Błąd podczas edycji komentarza:', error);

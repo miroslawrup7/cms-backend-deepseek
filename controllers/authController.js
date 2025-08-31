@@ -5,7 +5,7 @@ const baseCookieOptions = {
   httpOnly: true,
   sameSite: 'lax',
   secure: false,
-  path: '/'
+  path: '/',
 };
 
 // Rejestracja — użytkownik oczekujący na zatwierdzenie
@@ -30,7 +30,7 @@ const login = async (req, res) => {
 
     res.cookie('token', token, {
       ...baseCookieOptions,
-      maxAge: 24 * 60 * 60 * 1000 // 1 dzień
+      maxAge: 24 * 60 * 60 * 1000, // 1 dzień
     });
 
     res.json({ message: 'Zalogowano pomyślnie.' });
@@ -43,9 +43,9 @@ const login = async (req, res) => {
 };
 
 // Wylogowanie
-const logout = (req, res) => {
+const logout = (_req, res) => {
   res.clearCookie('token', {
-    ...baseCookieOptions
+    ...baseCookieOptions,
   });
   res.json({ message: 'Wylogowano.' });
 };
@@ -53,5 +53,5 @@ const logout = (req, res) => {
 module.exports = {
   registerPending,
   login,
-  logout
+  logout,
 };

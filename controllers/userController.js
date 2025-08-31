@@ -7,8 +7,8 @@ const getProfile = async (req, res) => {
     if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' });
     const user = await userService.getProfile(req.user._id);
     return res.json(user);
-  } catch (err) {
-    logger.error('Błąd getProfile:', err);
+  } catch (error) {
+    logger.error('Błąd getProfile:', error);
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
@@ -19,10 +19,10 @@ const updateProfile = async (req, res) => {
     if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' });
     const user = await userService.updateProfile(req.user._id, req.body);
     return res.json({ message: 'Profil zaktualizowany', user });
-  } catch (err) {
-    logger.error('Błąd updateProfile:', err);
-    if (err.message.includes('Nazwa użytkownika')) {
-      return res.status(400).json({ message: err.message });
+  } catch (error) {
+    logger.error('Błąd updateProfile:', error);
+    if (error.message.includes('Nazwa użytkownika')) {
+      return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
   }
@@ -35,10 +35,10 @@ const changePassword = async (req, res) => {
     const { oldPassword, newPassword } = req.body;
     await userService.changePassword(req.user._id, oldPassword, newPassword);
     return res.json({ message: 'Hasło zostało zmienione.' });
-  } catch (err) {
-    logger.error('Błąd changePassword:', err);
-    if (err.message.includes('Stare hasło') || err.message.includes('Nowe hasło')) {
-      return res.status(400).json({ message: err.message });
+  } catch (error) {
+    logger.error('Błąd changePassword:', error);
+    if (error.message.includes('Stare hasło') || error.message.includes('Nowe hasło')) {
+      return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
   }
@@ -49,8 +49,8 @@ const listUsers = async (req, res) => {
   try {
     const users = await userService.listUsers();
     return res.json(users);
-  } catch (err) {
-    logger.error('Błąd listUsers:', err);
+  } catch (error) {
+    logger.error('Błąd listUsers:', error);
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
@@ -62,10 +62,10 @@ const changeRole = async (req, res) => {
     const { role } = req.body;
     const user = await userService.changeRole(id, role);
     return res.json({ message: 'Rola zaktualizowana.', user });
-  } catch (err) {
-    logger.error('Błąd changeRole:', err);
-    if (err.message.includes('Rola') || err.message.includes('Nieprawidłowa')) {
-      return res.status(400).json({ message: err.message });
+  } catch (error) {
+    logger.error('Błąd changeRole:', error);
+    if (error.message.includes('Rola') || error.message.includes('Nieprawidłowa')) {
+      return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
   }
@@ -77,10 +77,10 @@ const deleteUser = async (req, res) => {
     const { id } = req.params;
     await userService.deleteUser(id);
     return res.status(204).end();
-  } catch (err) {
-    logger.error('Błąd deleteUser:', err);
-    if (err.message.includes('Użytkownik nie istnieje')) {
-      return res.status(404).json({ message: err.message });
+  } catch (error) {
+    logger.error('Błąd deleteUser:', error);
+    if (error.message.includes('Użytkownik nie istnieje')) {
+      return res.status(404).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
   }

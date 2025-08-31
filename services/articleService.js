@@ -50,28 +50,28 @@ const createArticle = async (title, content, authorId, imagePaths) => {
 };
 
 // Get articles with filtering, sorting, and pagination
-const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') => {
-  const skip = (parseInt(page) - 1) * parseInt(limit);
-
-  // Build filter
-  const rawQ = (search || '').trim().slice(0, 100);
-  const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const filter = rawQ
-    ? {
-        $or: [
-          { title: { $regex: esc(rawQ), $options: 'i' } },
-          { content: { $regex: esc(rawQ), $options: 'i' } },
-        ],
-      }
-    : {};
-
-  // Sort options
+const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') => {
+  const sort = _sort;
   const sortMap = {
     newest: { createdAt: -1 },
     oldest: { createdAt: 1 },
     titleAZ: { title: 1, createdAt: -1 },
     titleZA: { title: -1, createdAt: -1 },
   };
+
+  const skip = (parseInt(page) - 1) * parseInt(limit);
+  
+  // Build filter
+  const rawQ = (search || '').trim().slice(0, 100);
+  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const filter = rawQ
+    ? {
+      $or: [
+        { title: { $regex: esc(rawQ), $options: 'i' } },
+        { content: { $regex: esc(rawQ), $options: 'i' } },
+      ],
+    }
+    : {};
 
   let articlesRaw;
   let total;
@@ -104,7 +104,6 @@ const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') =>
       .skip(skip)
       .limit(parseInt(limit))
       .populate('author', 'email');
-
     total = await Article.countDocuments(filter);
   }
 
@@ -122,7 +121,7 @@ const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') =>
         author: article.author,
         thumbnail: article.images && article.images.length > 0 ? toPublicPath(article.images[0]) : null,
       };
-    })
+    }),
   );
 
   return { articles, total };
@@ -238,7 +237,9 @@ const toggleLikeArticle = async (articleId, userId) => {
     throw new Error('Autor nie może polubić własnego artykułu');
   }
 
-  const alreadyLiked = Array.isArray(article.likes) && article.likes.some((id) => String(id) === String(userId));
+  const alreadyLiked = Array.isArray(article.likes) && 
+                      article.likes.some((id) => String(id) === String(userId));
+  
   if (alreadyLiked) article.likes.pull(userId);
   else article.likes.push(userId);
 

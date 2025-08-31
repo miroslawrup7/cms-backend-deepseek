@@ -4,20 +4,26 @@ const validateFields = require('../utils/validate');
 const { sanitizeComment } = require('../utils/sanitize');
 
 // Add comment
-const addComment = async (articleId, authorId, text) => {
-  // Basic validation
-  const errors = validateFields({ text: [text, 'Komentarz nie może być pusty.'] });
+const addComment = async (articleId, authorId, rawText) => {
+  // 1. Walidacja podstawowa
+  const errors = validateFields({
+    text: [rawText, 'Komentarz nie może być pusty.'],
+  });
   if (errors.length) throw new Error(errors.join(' '));
 
-  // Sanitize
-  const sanitizedText = sanitizeComment(text);
+  // 2. Sanityzacja
+  const sanitizedText = sanitizeComment(rawText || '');
 
-  // Validate after sanitization
-  const plain = sanitizedText.replace(/<[^>]+>/g, '').trim();
-  if (!plain) {
-    throw new Error('Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.');
+  // 3. Walidacja po sanityzacji - sprawdź czy nie został pusty string
+  const plainText = sanitizedText.replace(/<[^>]+>/g, '').trim();
+  if (!plainText) {
+    throw new Error(
+      'Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.',
+    );
   }
-  if (plain.length < 6) {
+
+  // 4. Walidacja długości - DODAJ TEN WARUNEK
+  if (plainText.length < 6) {
     throw new Error('Komentarz musi mieć co najmniej 6 znaków.');
   }
 
@@ -54,7 +60,9 @@ const updateComment = async (commentId, userId, userRole, newText) => {
   const text = sanitizeComment(newText);
   const plain = text.replace(/<[^>]+>/g, '').trim();
   if (!plain) {
-    throw new Error('Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.');
+    throw new Error(
+      'Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.',
+    );
   }
   if (plain.length < 6) {
     throw new Error('Komentarz musi mieć co najmniej 6 znaków.');
@@ -65,7 +73,8 @@ const updateComment = async (commentId, userId, userRole, newText) => {
 
   const isAuthor = String(comment.author) === String(userId);
   const isAdmin = userRole === 'admin';
-  if (!isAuthor && !isAdmin) throw new Error('Brak uprawnień do edycji komentarza.');
+  if (!isAuthor && !isAdmin)
+    throw new Error('Brak uprawnień do edycji komentarza.');
 
   comment.text = text;
   await comment.save();
@@ -80,7 +89,8 @@ const deleteComment = async (commentId, userId, userRole) => {
 
   const isAuthor = String(comment.author) === String(userId);
   const isAdmin = userRole === 'admin';
-  if (!isAuthor && !isAdmin) throw new Error('Brak uprawnień do usunięcia komentarza.');
+  if (!isAuthor && !isAdmin)
+    throw new Error('Brak uprawnień do usunięcia komentarza.');
 
   await comment.deleteOne();
 };
