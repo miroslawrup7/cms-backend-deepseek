@@ -1,15 +1,20 @@
-// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
-const rateLimit = require('express-rate-limit');
 const path = require('path');
 const logger = require('./utils/logger');
 
-// 🎯 DODANE: Importy dla testów
+// 🎯 POPRAWIONE: JEDEN import limitersów
+const {
+  globalLimiter,
+  authLimiter,
+  adminLimiter,
+} = require('./middleware/rateLimit');
+
+// 🎯 DODANE: Import memory server dla testów
 const { MongoMemoryServer } = require('mongodb-memory-server');
 
 dotenv.config();
@@ -22,7 +27,7 @@ let MONGO_URI = process.env.MONGO_URI;
 // 🎯 DODANE: Zmienna dla memory server
 let mongoServer;
 
-// 🎯 DODANE: Funkcja inicjalizacji bazy testowej
+// 🎯 DODANE: Funkcja inicjalizacji testowej bazy
 const initializeTestDatabase = async () => {
   if (process.env.NODE_ENV === 'test') {
     mongoServer = await MongoMemoryServer.create();
@@ -60,15 +65,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-// Rate limit tylko dla /api/auth
-const authLimiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 1000,
-  standardHeaders: true,
-  legacyHeaders: false,
-  message: { message: 'Zbyt wiele żądań. Spróbuj ponownie później.' },
-});
-app.use('/api/auth', authLimiter);
+// 🎯 ZMIENIONE: Nowa konfiguracja rate limiting
+app.use('/api/auth', authLimiter); // 🎯 NOWY limiter dla auth
+app.use('/api/admin', adminLimiter); // 🎯 NOWY limiter dla admin
+app.use(globalLimiter); // 🎯 NOWY globalny limiter
 
 // Statyczne pliki (obrazki)
 app.use(

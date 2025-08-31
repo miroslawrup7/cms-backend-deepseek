@@ -6,11 +6,9 @@
   "scripts": {
     "start": "nodemon server.js",
     "dev": "node server.js",
-
     "test": "jest --config jest.config.js --verbose",
     "test:watch": "jest --config jest.config.js --watch",
     "test:coverage": "jest --config jest.config.js --coverage",
-
     "test:unit": "jest --testPathIgnorePatterns=\"integration\"",
     "test:integration": "jest --testPathPatterns=\"integration\" --verbose",
     "test:auth": "jest __tests__/integration/auth.test.js --verbose",
@@ -18,7 +16,7 @@
     "test:comments": "jest __tests__/integration/comments.test.js --verbose",
     "test:users": "jest __tests__/integration/users.test.js --verbose",
     "test:admin": "jest __tests__/integration/admin.test.js --verbose",
-    
+    "test:rateLimit": "jest __tests__/integration/rateLimit.test.js --verbose --testTimeout=30000",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
