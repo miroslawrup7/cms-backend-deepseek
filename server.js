@@ -1,4 +1,4 @@
-// server.js v.3
+// server.js
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
@@ -9,12 +9,36 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 const logger = require('./utils/logger');
 
+// 🎯 DODANE: Importy dla testów
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
 dotenv.config();
 const app = express();
 
 // Środowisko
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI;
+let MONGO_URI = process.env.MONGO_URI;
+
+// 🎯 DODANE: Zmienna dla memory server
+let mongoServer;
+
+// 🎯 DODANE: Funkcja inicjalizacji bazy testowej
+const initializeTestDatabase = async () => {
+  if (process.env.NODE_ENV === 'test') {
+    mongoServer = await MongoMemoryServer.create();
+    MONGO_URI = mongoServer.getUri();
+    logger.info(`🧪 Test MongoDB URI: ${MONGO_URI}`);
+  }
+};
+
+// 🎯 DODANE: Funkcja czyszczenia testowej bazy
+const cleanupTestDatabase = async () => {
+  if (process.env.NODE_ENV === 'test' && mongoServer) {
+    await mongoose.disconnect();
+    await mongoServer.stop();
+    logger.info('🧪 Test MongoDB stopped');
+  }
+};
 
 // Middleware
 app.use(helmet());
@@ -68,9 +92,8 @@ app.use((req, res) => {
   res.status(404).json({ message: 'Nie znaleziono endpointu.' });
 });
 
-// Globalny error handler - musi być na końcu, po wszystkich middleware i routes
+// Globalny error handler
 app.use((err, req, res, _next) => {
-  // 1. SPECJALNE PRZYPADKI (istniejąca logika dla Multera)
   if (err && err.code === 'LIMIT_FILE_SIZE') {
     return res.status(413).json({ message: 'Za duży plik. Limit 5MB.' });
   }
@@ -84,11 +107,9 @@ app.use((err, req, res, _next) => {
       .json({ message: 'Dozwolone są tylko pliki graficzne.' });
   }
 
-  // 2. NOWA LOGIKA - AppError i standardowe błędy
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 
-  // Development - szczegółowe logi
   if (process.env.NODE_ENV === 'development') {
     logger.error('ERROR 💥:', err);
     return res.status(err.statusCode).json({
@@ -99,15 +120,12 @@ app.use((err, req, res, _next) => {
     });
   }
 
-  // Production - ogólne komunikaty
   if (err.isOperational) {
-    // Błędy operacyjne (AppError) - pokazujemy komunikat
     return res.status(err.statusCode).json({
       status: err.status,
       message: err.message,
     });
   } else {
-    // Nieznane błędy programistyczne - nie pokazujemy szczegółów
     logger.error('ERROR 💥:', err);
     return res.status(500).json({
       status: 'error',
@@ -116,19 +134,50 @@ app.use((err, req, res, _next) => {
   }
 });
 
-// Połączenie z MongoDB i start
-mongoose
-  .connect(MONGO_URI, {})
-  .then(() => {
+// 🎯 ZMODYFIKOWANE: Funkcja startu serwera
+const startServer = async () => {
+  try {
+    // Inicjalizuj testową bazę jeśli potrzeba
+    await initializeTestDatabase();
+
+    // Połączenie z MongoDB
+    await mongoose.connect(MONGO_URI, {});
     logger.info('✅ Połączono z MongoDB');
 
     const conn = mongoose.connection;
     logger.info(`📦 Baza: ${conn.name}`);
     logger.info(`🌐 Host: ${conn.host}`);
 
-    app.listen(PORT, () => logger.info(`🚀 Serwer działa na porcie ${PORT}`));
-  })
-  .catch((err) => {
-    logger.error('❌ Błąd połączenia z MongoDB:', err);
+    // Uruchom serwer tylko jeśli nie jesteśmy w testach
+    if (process.env.NODE_ENV !== 'test') {
+      app.listen(PORT, () => logger.info(`🚀 Serwer działa na porcie ${PORT}`));
+    }
+  } catch (err) {
+    logger.error('❌ Błąd uruchamiania serwera:', err);
+
+    // Sprzątanie testowej bazy w przypadku błędu
+    await cleanupTestDatabase();
     process.exit(1);
-  });
+  }
+};
+
+// 🎯 DODANE: Eksport app dla testów Supertest
+if (process.env.NODE_ENV === 'test') {
+  module.exports = { app, startServer, cleanupTestDatabase };
+} else {
+  // Standardowe uruchomienie
+  startServer();
+}
+
+// 🎯 DODANE: Obsługa graceful shutdown
+process.on('SIGINT', async () => {
+  logger.info('🛑 Zamykanie serwera...');
+  await cleanupTestDatabase();
+  process.exit(0);
+});
+
+process.on('SIGTERM', async () => {
+  logger.info('🛑 Zamykanie serwera (SIGTERM)...');
+  await cleanupTestDatabase();
+  process.exit(0);
+});

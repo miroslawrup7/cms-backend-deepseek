@@ -16,4 +16,8 @@ module.exports = {
       statements: 0,
     },
   },
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '__tests__/integration/.+', // ignoruj puste pliki
+  ],
 };
