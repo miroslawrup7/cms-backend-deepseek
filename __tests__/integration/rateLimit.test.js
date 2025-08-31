@@ -1,5 +1,4 @@
 const request = require('supertest');
-const mongoose = require('mongoose');
 const { app, startServer, cleanupTestDatabase } = require('../../server');
 const User = require('../../models/User');
 const bcrypt = require('bcryptjs');
