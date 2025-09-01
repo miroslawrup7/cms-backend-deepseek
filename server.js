@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const path = require('path');
 const logger = require('./utils/logger');
+const deepSanitize = require('./middleware/sanitizeMiddleware');
 
 // 🎯 POPRAWIONE: JEDEN import limitersów
 const {
@@ -47,6 +48,10 @@ const cleanupTestDatabase = async () => {
 
 // Middleware
 app.use(helmet());
+// Używaj middleware TYLKO w produkcji/development, NIE w testach
+if (process.env.NODE_ENV !== 'test') {
+  app.use(deepSanitize);
+}
 app.use(express.json());
 app.use(cookieParser());
 

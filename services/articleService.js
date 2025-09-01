@@ -31,8 +31,10 @@ const createArticle = async (title, content, authorId, imagePaths) => {
     content: [content, 'Treść jest wymagana'],
   });
 
-  if (title && title.length < 5) errors.push('Tytuł musi mieć co najmniej 5 znaków');
-  if (content && content.length < 20) errors.push('Treść musi mieć co najmniej 20 znaków');
+  if (title && title.length < 5)
+    errors.push('Tytuł musi mieć co najmniej 5 znaków');
+  if (content && content.length < 20)
+    errors.push('Treść musi mieć co najmniej 20 znaków');
   if (errors.length) throw new Error(errors.join(' '));
 
   const sanitizedTitle = sanitizeTitle(title);
@@ -50,7 +52,12 @@ const createArticle = async (title, content, authorId, imagePaths) => {
 };
 
 // Get articles with filtering, sorting, and pagination
-const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') => {
+const getArticles = async (
+  page = 1,
+  limit = 5,
+  search = '',
+  _sort = 'newest',
+) => {
   const sort = _sort;
   const sortMap = {
     newest: { createdAt: -1 },
@@ -60,17 +67,17 @@ const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') =
   };
 
   const skip = (parseInt(page) - 1) * parseInt(limit);
-  
+
   // Build filter
   const rawQ = (search || '').trim().slice(0, 100);
   const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const filter = rawQ
     ? {
-      $or: [
-        { title: { $regex: esc(rawQ), $options: 'i' } },
-        { content: { $regex: esc(rawQ), $options: 'i' } },
-      ],
-    }
+        $or: [
+          { title: { $regex: esc(rawQ), $options: 'i' } },
+          { content: { $regex: esc(rawQ), $options: 'i' } },
+        ],
+      }
     : {};
 
   let articlesRaw;
@@ -110,7 +117,9 @@ const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') =
   // Process articles
   const articles = await Promise.all(
     articlesRaw.map(async (article) => {
-      const commentCount = await Comment.countDocuments({ article: article._id });
+      const commentCount = await Comment.countDocuments({
+        article: article._id,
+      });
       return {
         _id: article._id,
         title: article.title,
@@ -119,7 +128,10 @@ const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') =
         commentCount,
         createdAt: article.createdAt,
         author: article.author,
-        thumbnail: article.images && article.images.length > 0 ? toPublicPath(article.images[0]) : null,
+        thumbnail:
+          article.images && article.images.length > 0
+            ? toPublicPath(article.images[0])
+            : null,
       };
     }),
   );
@@ -129,20 +141,31 @@ const getArticles = async (page = 1, limit = 5, search = '', _sort = 'newest') =
 
 // Get article by ID
 const getArticleById = async (id) => {
-  const article = await Article.findById(id).populate('author', 'username email');
+  const article = await Article.findById(id).populate(
+    'author',
+    'username email',
+  );
   if (!article) throw new Error('Nie znaleziono artykułu');
 
   const commentCount = await Comment.countDocuments({ article: article._id });
 
   const articleObj = article.toObject();
-  articleObj.images = Array.isArray(articleObj.images) ? articleObj.images.map(toPublicPath) : [];
+  articleObj.images = Array.isArray(articleObj.images)
+    ? articleObj.images.map(toPublicPath)
+    : [];
   articleObj.commentCount = commentCount;
 
   return articleObj;
 };
 
 // Update article
-const updateArticle = async (articleId, updateData, userId, userRole, files) => {
+const updateArticle = async (
+  articleId,
+  updateData,
+  userId,
+  userRole,
+  files,
+) => {
   const { title, content, removeImages } = updateData;
   const article = await Article.findById(articleId);
   if (!article) throw new Error('Artykuł nie znaleziony');
@@ -179,7 +202,9 @@ const updateArticle = async (articleId, updateData, userId, userRole, files) => 
 
   // Add new images
   if (files && files.length > 0) {
-    const newImages = files.map((f) => `uploads/${f.filename}`.replace(/\\/g, '/'));
+    const newImages = files.map((f) =>
+      `uploads/${f.filename}`.replace(/\\/g, '/'),
+    );
     article.images.push(...newImages);
   }
 
@@ -190,7 +215,8 @@ const updateArticle = async (articleId, updateData, userId, userRole, files) => 
     else article.title = sanitizeTitle(title);
   }
   if (content) {
-    if (content.length < 20) errors.push('Treść musi mieć co najmniej 20 znaków');
+    if (content.length < 20)
+      errors.push('Treść musi mieć co najmniej 20 znaków');
     else article.content = sanitizeBody(content);
   }
   if (errors.length) throw new Error(errors.join(' '));
@@ -237,9 +263,10 @@ const toggleLikeArticle = async (articleId, userId) => {
     throw new Error('Autor nie może polubić własnego artykułu');
   }
 
-  const alreadyLiked = Array.isArray(article.likes) && 
-                      article.likes.some((id) => String(id) === String(userId));
-  
+  const alreadyLiked =
+    Array.isArray(article.likes) &&
+    article.likes.some((id) => String(id) === String(userId));
+
   if (alreadyLiked) article.likes.pull(userId);
   else article.likes.push(userId);
 

@@ -26,20 +26,20 @@ module.exports = [
     rules: {
       ...js.configs.recommended.rules,
       'no-unused-vars': [
-        'error', 
-        { 
-          'argsIgnorePattern': '^_',
-          'varsIgnorePattern': '^_',
-          'caughtErrorsIgnorePattern': '^_',
-          'destructuredArrayIgnorePattern': '^_',
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
         },
       ],
       'no-console': 'warn',
       'prefer-const': 'error',
       'no-var': 'error',
-      'quotes': ['error', 'single', { 'avoidEscape': true }],
-      'semi': ['error', 'always'],
-      'indent': ['error', 2],
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'always'],
+      // 'indent': ['error', 2],
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'array-bracket-spacing': ['error', 'never'],
@@ -56,12 +56,12 @@ module.exports = [
     rules: {
       'no-console': 'off',
       'no-unused-vars': [
-        'error', 
-        { 
-          'argsIgnorePattern': '^_',
-          'varsIgnorePattern': '^_',
-          'caughtErrorsIgnorePattern': '^_',
-          'destructuredArrayIgnorePattern': '^_',
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
         },
       ],
     },
