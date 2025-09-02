@@ -50,7 +50,7 @@
     ✅ Content Security Policy headers
 
 3.2. Wydajność
-    ⚪ Cache'owanie odpowiedzi (Redis)
+    ✅ Cache'owanie odpowiedzi (Redis)
     ⚪ Optymalizacja zapytań MongoDB
     ⚪ Paginacja dla wszystkich list
 
