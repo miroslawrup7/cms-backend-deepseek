@@ -40,10 +40,12 @@
     "mongoose": "^8.17.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
+    "redis": "^5.8.2",
     "sanitize-html": "^2.17.0",
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@types/redis": "^4.0.10",
     "dotenv": "^17.2.1",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",

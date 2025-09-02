@@ -39,7 +39,7 @@ module.exports = [
       'no-var': 'error',
       quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always'],
-      // 'indent': ['error', 2],
+      'indent': ['error', 2],
       'comma-dangle': ['error', 'always-multiline'],
       'object-curly-spacing': ['error', 'always'],
       'array-bracket-spacing': ['error', 'never'],

@@ -47,7 +47,7 @@
 3.1. Bezpieczeństwo
     ✅ Rate limiting dla wszystkich endpointów
     ✅ Weryfikacja sanitization
-    ⚪ Content Security Policy headers
+    ✅ Content Security Policy headers
 
 3.2. Wydajność
     ⚪ Cache'owanie odpowiedzi (Redis)

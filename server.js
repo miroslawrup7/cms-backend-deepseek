@@ -7,6 +7,9 @@ const cors = require('cors');
 const path = require('path');
 const logger = require('./utils/logger');
 const deepSanitize = require('./middleware/sanitizeMiddleware');
+const cspMiddleware = require('./middleware/cspMiddleware');
+const redisClient = require('./utils/redisClient');
+const { cacheMiddleware } = require('./middleware/cacheMiddleware');
 
 // 🎯 POPRAWIONE: JEDEN import limitersów
 const {
@@ -48,7 +51,7 @@ const cleanupTestDatabase = async () => {
 
 // Middleware
 app.use(helmet());
-// Używaj middleware TYLKO w produkcji/development, NIE w testach
+app.use(cspMiddleware);
 if (process.env.NODE_ENV !== 'test') {
   app.use(deepSanitize);
 }
@@ -139,11 +142,24 @@ app.use((err, req, res, _next) => {
   }
 });
 
+// Inicjalizacja Redis przy starcie
+const initRedis = async () => {
+  try {
+    await redisClient.connect();
+    console.log('✅ Redis connected');
+  } catch (error) {
+    console.log('❌ Redis not available, continuing without cache');
+  }
+};
+
 // 🎯 ZMODYFIKOWANE: Funkcja startu serwera
 const startServer = async () => {
   try {
     // Inicjalizuj testową bazę jeśli potrzeba
     await initializeTestDatabase();
+
+    // Inicjalizacja Redis
+    await initRedis();
 
     // Połączenie z MongoDB
     await mongoose.connect(MONGO_URI, {});
@@ -177,12 +193,14 @@ if (process.env.NODE_ENV === 'test') {
 // 🎯 DODANE: Obsługa graceful shutdown
 process.on('SIGINT', async () => {
   logger.info('🛑 Zamykanie serwera...');
+  await redisClient.disconnect();
   await cleanupTestDatabase();
   process.exit(0);
 });
 
 process.on('SIGTERM', async () => {
   logger.info('🛑 Zamykanie serwera (SIGTERM)...');
+  await redisClient.disconnect();
   await cleanupTestDatabase();
   process.exit(0);
 });
