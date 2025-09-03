@@ -1,0 +1,1226 @@
+{
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\controllers\\adminController.js": {
+    "version": 1,
+    "hash": "d39c41ab2bea60caeb23e2f60f029781"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\controllers\\articleController.js": {
+    "version": 1,
+    "hash": "34d7252267c46baae04d54d24c8c17bb"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\controllers\\authController.js": {
+    "version": 1,
+    "hash": "bd66ecd3f164f75c71d9e0c5cef63d12"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\controllers\\commentController.js": {
+    "version": 1,
+    "hash": "c82e81de2f6ac35f6b468f7bfc1ff5d1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\controllers\\userController.js": {
+    "version": 1,
+    "hash": "27e5c132aae5d714476374e8650af7f2"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\authMiddleware.js": {
+    "version": 1,
+    "hash": "2b93b4e5ced5ff7e773673dee2a23810"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\isAuthor.js": {
+    "version": 1,
+    "hash": "1a7ef70cd98702be32b58b0962b95db9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\isCommentAuthor.js": {
+    "version": 1,
+    "hash": "fe186723f0b57c0b55dbad5d8e580a5a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\requireAdmin.js": {
+    "version": 1,
+    "hash": "49c3392c797575b827313bd958ef22e4"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\requireAuth.js": {
+    "version": 1,
+    "hash": "32c548182210230afa91f14edf065a3e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\requireAuthorOrAdmin.js": {
+    "version": 1,
+    "hash": "c533565128d7487d77ffdb968bfa0c2d"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\middleware\\upload.js": {
+    "version": 1,
+    "hash": "fd39d8a979b0bdc8e46f68d0e0d776a1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\models\\Article.js": {
+    "version": 1,
+    "hash": "9de40cfa8d8f1ff3768cf49436271f7f"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\models\\Comment.js": {
+    "version": 1,
+    "hash": "c2200434fe4c8e6a0bc501872f98ba04"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\models\\PendingUser.js": {
+    "version": 1,
+    "hash": "5ae17af2f9db399acb60f5baf0309970"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\models\\User.js": {
+    "version": 1,
+    "hash": "91c14be8e06c6265247693da60ef5979"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\routes\\adminRoutes.js": {
+    "version": 1,
+    "hash": "759751ed3b7063bddf26846fe3603d17"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\routes\\articleRoutes.js": {
+    "version": 1,
+    "hash": "cb94f8309aa199fc1cb5cded4e44d0b0"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\routes\\authRoutes.js": {
+    "version": 1,
+    "hash": "bde716e96768567a56fbd1036f0991cf"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\routes\\commentRoutes.js": {
+    "version": 1,
+    "hash": "c58662336502167c5be777cda2eef1c4"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\routes\\userRoutes.js": {
+    "version": 1,
+    "hash": "66de3eeda38fad2da888f9ba574ddc6b"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754068886780-2025-05-08_17-46-27(1)-01.jpg": {
+    "version": 1,
+    "hash": "781be9000d2708e7564e5303493e04fe"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754152749228-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754156567535-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754241925862-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754310977682-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754310977688-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754310977693-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754310977698-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754310977702-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754332478792-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754332492051-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754332582184-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754332738296-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754332774555-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754367503118-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754387409764-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754462018664-415954181.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754462123958-301796897.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754462384224-743992369.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754462515056-53701265.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754466490832-679145436.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754487751546-136461086.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754487788362-92598928.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754487826811-398469964.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754487826814-856807431.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754487826816-273726342.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754488665308-463888655.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754491303538-69773656.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754497317961-377443572.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\uploads\\1754497317966-945997040.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\utils\\emailTemplates.js": {
+    "version": 1,
+    "hash": "a22f87d65e88f82fd16a7235921e9416"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\utils\\mailer.js": {
+    "version": 1,
+    "hash": "6ed842e9f8ceca70ec8bf23ed5aece93"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\utils\\sanitize.js": {
+    "version": 1,
+    "hash": "4354e4a1838c94daf774181977f341cd"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\utils\\validate.js": {
+    "version": 1,
+    "hash": "96f4e0ac0eeea5661c9bde5528325165"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\.env": {
+    "version": 1,
+    "hash": "7a0d9cc2f69c506c2df4450c8a373798"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend GROK\\server.js": {
+    "version": 1,
+    "hash": "ed405df07e1e63ff1763e21e353ae458"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\controllers\\adminController.js": {
+    "version": 4,
+    "hash": "92d602b499ecbab13798bc44d596130f"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\controllers\\articleController.js": {
+    "version": 3,
+    "hash": "9ebe716720cb7c43458ee5c67fde2e42"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\controllers\\authController.js": {
+    "version": 2,
+    "hash": "c162ef1ff4c33496540483689d802e7c"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\controllers\\commentController.js": {
+    "version": 3,
+    "hash": "df01fac62ee5a3047bb06b33529034a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\controllers\\userController.js": {
+    "version": 3,
+    "hash": "62f73b134d7c5758c5771a26a1f22f47"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\authMiddleware.js": {
+    "version": 2,
+    "hash": "95205ae34642fee25ae21e35ba85812c"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\isAuthor.js": {
+    "version": 2,
+    "hash": "e9d7e711982b7118520fba7379661cd7"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\isCommentAuthor.js": {
+    "version": 2,
+    "hash": "69a365383f39b5c8dc1ceb562e3160d7"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\requireAdmin.js": {
+    "version": 2,
+    "hash": "0e4021784bc285d625941d9f0b5d3e43"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\requireAuthorOrAdmin.js": {
+    "version": 2,
+    "hash": "550f8f2ffca172e90ddeb692f77f3fe2"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\upload.js": {
+    "version": 2,
+    "hash": "5f8528eeaf026335682e72da91f0d94c"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\middleware\\validateObjectId.js": {
+    "version": 2,
+    "hash": "1fc52785f96d1645de1e4bafa0529654"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\models\\Article.js": {
+    "version": 1,
+    "hash": "8bc32eb46af364a6830079c16f4162e3"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\models\\Comment.js": {
+    "version": 1,
+    "hash": "629a24b7ed26f0663863a73676b822d4"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\models\\PendingUser.js": {
+    "version": 1,
+    "hash": "ed54fc8424053bc9d7c483627dec5a19"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\models\\User.js": {
+    "version": 1,
+    "hash": "a24723d3527cb783ccb1bdf4adf2e7e0"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\routes\\adminRoutes.js": {
+    "version": 1,
+    "hash": "759751ed3b7063bddf26846fe3603d17"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\routes\\articleRoutes.js": {
+    "version": 1,
+    "hash": "e6ecc4548ce42a1325ffa2fd6d277716"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\routes\\authRoutes.js": {
+    "version": 1,
+    "hash": "e45e5cda3865746005d68825e14e3a67"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\routes\\commentRoutes.js": {
+    "version": 1,
+    "hash": "0417fec68d62b4463d2b7cc32b9e9db2"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\routes\\userRoutes.js": {
+    "version": 1,
+    "hash": "968472866e82887c199539ff9c1bfefd"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754068886780-2025-05-08_17-46-27(1)-01.jpg": {
+    "version": 1,
+    "hash": "781be9000d2708e7564e5303493e04fe"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754152749228-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754156567535-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754241925862-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754310977682-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754310977688-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754310977693-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754310977698-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754310977702-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754332478792-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754332492051-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754332582184-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754332738296-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754332774555-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754367503118-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754387409764-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754462018664-415954181.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754462123958-301796897.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754462384224-743992369.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754462515056-53701265.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754466490832-679145436.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754487751546-136461086.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754487788362-92598928.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754487826811-398469964.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754487826814-856807431.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754487826816-273726342.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754488665308-463888655.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754491303538-69773656.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754497317961-377443572.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1754497317966-945997040.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1756234408292-979512228.jpg": {
+    "version": 1,
+    "hash": "e087ee1910f5164072394cca70b16a0c"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\uploads\\1756318975759-173818095.jpg": {
+    "version": 1,
+    "hash": "5326489eff9a31376d018d5d44c1d38d"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\AppError.js": {
+    "version": 1,
+    "hash": "0481bfcbf4dde8f155c1ea10a2b9178a"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\advancedValidate.js": {
+    "version": 1,
+    "hash": "9132091acffdc94b0467ef60900fc3d8"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\emailTemplates.js": {
+    "version": 1,
+    "hash": "a0077559e5d3ac624b6f6ddd91536dcc"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\mailer.js": {
+    "version": 1,
+    "hash": "6ed842e9f8ceca70ec8bf23ed5aece93"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\sanitize.js": {
+    "version": 1,
+    "hash": "4354e4a1838c94daf774181977f341cd"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\validate.js": {
+    "version": 1,
+    "hash": "44828f4fda881883346ea0b6e1326b61"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.env": {
+    "version": 3,
+    "hash": "214c779a60fb09eb1b8e5f969aa8a44f"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\server.js": {
+    "version": 4,
+    "hash": "298c9fc01d46a6b7f306ef3a23dc0c82"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.editorconfig": {
+    "version": 1,
+    "hash": "74abcff66e9384f8f7191fc912d267aa"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.prettierrc": {
+    "version": 1,
+    "hash": "485f310be6f2e3c0ba068b7c2347c144"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\eslint.config.js": {
+    "version": 2,
+    "hash": "15b409a1fb0fa368a15d26477d020bae"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.vscode\\settings.json": {
+    "version": 2,
+    "hash": "07142841288ac91340c4713f757602f4"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\services\\articleService.js": {
+    "version": 4,
+    "hash": "1cc471ed1317db422e24a9266becb193"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\services\\authService.js": {
+    "version": 1,
+    "hash": "7f2341f98c5715516449caade289d7e7"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\services\\commentService.js": {
+    "version": 2,
+    "hash": "8ac4bde19b95cfea9022d5c4ca55ffb7"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\services\\userService.js": {
+    "version": 1,
+    "hash": "8ac2044b3ffd062f814d15ffd554b0a6"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__test__\\example.test.js": {
+    "version": 1,
+    "hash": "e8b56cf6ac91430256ed1d03a4ea1593"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\articles.bson": {
+    "version": 1,
+    "hash": "8389f732a95d5e44815a0097b793c978"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\articles.metadata.json": {
+    "version": 1,
+    "hash": "fe1f1c8146408071b0bb52cd158faf1c"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\comments.bson": {
+    "version": 1,
+    "hash": "87aa368923d0e73e0ad66fadb9b9732b"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\comments.metadata.json": {
+    "version": 1,
+    "hash": "474f687318a87874cf24f81f1c0b91f0"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\pendingusers.bson": {
+    "version": 1,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\pendingusers.metadata.json": {
+    "version": 1,
+    "hash": "0c4dced418d91c1c98a5b7a72affc3d5"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\users.bson": {
+    "version": 1,
+    "hash": "3cc70f77383d36eddb6f3a5b477ddac2"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\backup\\cms\\users.metadata.json": {
+    "version": 1,
+    "hash": "4cc11ba3790857e698353610932f8500"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\utils\\logger.js": {
+    "version": 1,
+    "hash": "c28f94ca4b43198240b12edf6769dd39"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.gitattributes": {
+    "version": 1,
+    "hash": "abc89807bf0b66cec65c1870ca483ddd"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.gitignore": {
+    "version": 1,
+    "hash": "2ebb477b4208787ee94335acfe99b91e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\jest.config.js": {
+    "version": 3,
+    "hash": "30ce0514710d74f6ca9f53e232903744"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\package.json": {
+    "version": 3,
+    "hash": "0c3d9c498df158a09a097de19cf826c9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\.env.test": {
+    "version": 1,
+    "hash": "93aaf6d16a1f9e1f9699614a4d18bbce"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\example.test.js": {
+    "version": 1,
+    "hash": "e8b56cf6ac91430256ed1d03a4ea1593"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\articleService.createArticle.test.js": {
+    "version": 2,
+    "hash": "3465a6c01af6d974f4147732989d6c8e"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\articleService.getArticles.test.js": {
+    "version": 2,
+    "hash": "56a28a8d1778b140d9897af25432b952"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\articleService.toggleLikeArticle.test.js": {
+    "version": 2,
+    "hash": "b19944e2113f556f31440936bdcf49d5"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\authService.register.pending.test.js": {
+    "version": 2,
+    "hash": "5c040504fcf4069e67582683f34158e8"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\authService.test.js": {
+    "version": 2,
+    "hash": "9d251f38dc5fcbe2bf68826758c07f3d"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\commentService.test.js": {
+    "version": 2,
+    "hash": "a5f39fbd86b06827f13257d9938cc6d9"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\userService.integration.test.js": {
+    "version": 1,
+    "hash": "2fc974da26faba6c60074b6e138c4b90"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\services\\userService.test.js": {
+    "version": 2,
+    "hash": "c666c789d91f8c8b9f6218aceea97212"
+  },
+  "D:\\Programowanie\\projekty inne\\Projekt CMS Grok kontynuacja po ChatGPT\\cms-project\\cms-backend DeepSeek\\__tests__\\controllers\\adminController.test.js": {
+    "version": 1,
+    "hash": "c5b168d5ba49e7f2b00ca10d5aaa6eb9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.vscode\\settings.json": {
+    "version": 1,
+    "hash": "65d951bd423d2da58a8121c40a884123"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\controllers\\adminController.test.js": {
+    "version": 1,
+    "hash": "c5b168d5ba49e7f2b00ca10d5aaa6eb9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\articleService.createArticle.test.js": {
+    "version": 1,
+    "hash": "3465a6c01af6d974f4147732989d6c8e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\articleService.getArticles.test.js": {
+    "version": 1,
+    "hash": "56a28a8d1778b140d9897af25432b952"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\articleService.toggleLikeArticle.test.js": {
+    "version": 1,
+    "hash": "b19944e2113f556f31440936bdcf49d5"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\authService.register.pending.test.js": {
+    "version": 1,
+    "hash": "5c040504fcf4069e67582683f34158e8"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\authService.test.js": {
+    "version": 1,
+    "hash": "9d251f38dc5fcbe2bf68826758c07f3d"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\commentService.test.js": {
+    "version": 1,
+    "hash": "5a158a1f3479ecd5518354bcfdf3c3f7"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\userService.integration.test.js": {
+    "version": 2,
+    "hash": "17f4bae393b3b6a8212961b537089419"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\services\\userService.test.js": {
+    "version": 1,
+    "hash": "c666c789d91f8c8b9f6218aceea97212"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\articles.bson": {
+    "version": 1,
+    "hash": "8389f732a95d5e44815a0097b793c978"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\articles.metadata.json": {
+    "version": 1,
+    "hash": "fe1f1c8146408071b0bb52cd158faf1c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\comments.bson": {
+    "version": 1,
+    "hash": "87aa368923d0e73e0ad66fadb9b9732b"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\comments.metadata.json": {
+    "version": 1,
+    "hash": "474f687318a87874cf24f81f1c0b91f0"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\pendingusers.bson": {
+    "version": 1,
+    "hash": "d41d8cd98f00b204e9800998ecf8427e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\pendingusers.metadata.json": {
+    "version": 1,
+    "hash": "0c4dced418d91c1c98a5b7a72affc3d5"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\users.bson": {
+    "version": 1,
+    "hash": "3cc70f77383d36eddb6f3a5b477ddac2"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\backup\\cms\\users.metadata.json": {
+    "version": 1,
+    "hash": "4cc11ba3790857e698353610932f8500"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\controllers\\adminController.js": {
+    "version": 1,
+    "hash": "92d602b499ecbab13798bc44d596130f"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\controllers\\articleController.js": {
+    "version": 1,
+    "hash": "9ebe716720cb7c43458ee5c67fde2e42"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\controllers\\authController.js": {
+    "version": 1,
+    "hash": "c162ef1ff4c33496540483689d802e7c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\controllers\\commentController.js": {
+    "version": 1,
+    "hash": "df01fac62ee5a3047bb06b33529034a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\controllers\\userController.js": {
+    "version": 1,
+    "hash": "62f73b134d7c5758c5771a26a1f22f47"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\authMiddleware.js": {
+    "version": 1,
+    "hash": "95205ae34642fee25ae21e35ba85812c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\isAuthor.js": {
+    "version": 1,
+    "hash": "e9d7e711982b7118520fba7379661cd7"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\isCommentAuthor.js": {
+    "version": 1,
+    "hash": "69a365383f39b5c8dc1ceb562e3160d7"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\requireAdmin.js": {
+    "version": 1,
+    "hash": "0e4021784bc285d625941d9f0b5d3e43"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\requireAuthorOrAdmin.js": {
+    "version": 1,
+    "hash": "550f8f2ffca172e90ddeb692f77f3fe2"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\upload.js": {
+    "version": 1,
+    "hash": "5f8528eeaf026335682e72da91f0d94c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\validateObjectId.js": {
+    "version": 1,
+    "hash": "1fc52785f96d1645de1e4bafa0529654"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\Article.js": {
+    "version": 1,
+    "hash": "8bc32eb46af364a6830079c16f4162e3"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\Comment.js": {
+    "version": 1,
+    "hash": "629a24b7ed26f0663863a73676b822d4"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\PendingUser.js": {
+    "version": 1,
+    "hash": "ed54fc8424053bc9d7c483627dec5a19"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\User.js": {
+    "version": 1,
+    "hash": "a24723d3527cb783ccb1bdf4adf2e7e0"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\adminRoutes.js": {
+    "version": 1,
+    "hash": "759751ed3b7063bddf26846fe3603d17"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\articleRoutes.js": {
+    "version": 1,
+    "hash": "e6ecc4548ce42a1325ffa2fd6d277716"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\authRoutes.js": {
+    "version": 1,
+    "hash": "e45e5cda3865746005d68825e14e3a67"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\commentRoutes.js": {
+    "version": 1,
+    "hash": "0417fec68d62b4463d2b7cc32b9e9db2"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\userRoutes.js": {
+    "version": 1,
+    "hash": "968472866e82887c199539ff9c1bfefd"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\articleService.js": {
+    "version": 2,
+    "hash": "12b888966404924768cb34204484983f"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\authService.js": {
+    "version": 1,
+    "hash": "7f2341f98c5715516449caade289d7e7"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\commentService.js": {
+    "version": 2,
+    "hash": "fa618f06191e9ed96a52daf2434bcd98"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\userService.js": {
+    "version": 1,
+    "hash": "8ac2044b3ffd062f814d15ffd554b0a6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754068886780-2025-05-08_17-46-27(1)-01.jpg": {
+    "version": 1,
+    "hash": "781be9000d2708e7564e5303493e04fe"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754152749228-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754156567535-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754241925862-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754310977682-92812186_3218584588186739_8353233957860409344_n.jpg": {
+    "version": 1,
+    "hash": "6e9acb3629bed689c8353fe7ac42d51e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754310977688-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754310977693-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754310977698-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754310977702-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754332478792-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754332492051-93254356_3218584681520063_688158527956451328_n.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754332582184-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754332738296-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754332774555-92989817_3218584841520047_9082093743397404672_n.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754367503118-93303604_3218584784853386_6430330249937944576_n.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754387409764-92948159_3218584998186698_4977806751773491200_n.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754462018664-415954181.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754462123958-301796897.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754462384224-743992369.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754462515056-53701265.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754466490832-679145436.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754487751546-136461086.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754487788362-92598928.jpg": {
+    "version": 1,
+    "hash": "a66d386b4c871fbd52732ea300eadbc1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754487826811-398469964.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754487826814-856807431.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754487826816-273726342.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754488665308-463888655.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754491303538-69773656.jpg": {
+    "version": 1,
+    "hash": "7617d54484c3aa4f01af5d22e528809a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754497317961-377443572.jpg": {
+    "version": 1,
+    "hash": "3fe675ec9664f8a07c2795055e7410a9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1754497317966-945997040.jpg": {
+    "version": 1,
+    "hash": "46a7a05230636c23fc9a1df0a9c3ce29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756234408292-979512228.jpg": {
+    "version": 1,
+    "hash": "e087ee1910f5164072394cca70b16a0c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756318975759-173818095.jpg": {
+    "version": 1,
+    "hash": "5326489eff9a31376d018d5d44c1d38d"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\AppError.js": {
+    "version": 1,
+    "hash": "0481bfcbf4dde8f155c1ea10a2b9178a"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\advancedValidate.js": {
+    "version": 1,
+    "hash": "9132091acffdc94b0467ef60900fc3d8"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\emailTemplates.js": {
+    "version": 1,
+    "hash": "a0077559e5d3ac624b6f6ddd91536dcc"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\logger.js": {
+    "version": 1,
+    "hash": "c28f94ca4b43198240b12edf6769dd39"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\mailer.js": {
+    "version": 1,
+    "hash": "6ed842e9f8ceca70ec8bf23ed5aece93"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\sanitize.js": {
+    "version": 3,
+    "hash": "e12df26da368db442719e59febf39834"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\validate.js": {
+    "version": 1,
+    "hash": "44828f4fda881883346ea0b6e1326b61"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.editorconfig": {
+    "version": 1,
+    "hash": "74abcff66e9384f8f7191fc912d267aa"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.env": {
+    "version": 1,
+    "hash": "214c779a60fb09eb1b8e5f969aa8a44f"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.env.test": {
+    "version": 1,
+    "hash": "7cddabe3a4bb5c75d8409adc11715c50"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.gitattributes": {
+    "version": 1,
+    "hash": "abc89807bf0b66cec65c1870ca483ddd"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.gitignore": {
+    "version": 1,
+    "hash": "2ebb477b4208787ee94335acfe99b91e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.prettierrc": {
+    "version": 1,
+    "hash": "a33c9447ad68be617ab79d55acec9687"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\eslint.config.js": {
+    "version": 1,
+    "hash": "15b409a1fb0fa368a15d26477d020bae"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\jest.config.js": {
+    "version": 3,
+    "hash": "15db7218848230dcbe2ad1e07ebe1f46"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\package.json": {
+    "version": 3,
+    "hash": "c2d7ce15010072d57289d2ba0180b930"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\server.js": {
+    "version": 5,
+    "hash": "e8229bcee8d99508d10fef4179ba3010"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\admin.test.js": {
+    "version": 2,
+    "hash": "deedb4133b9a47731193f91972b1972e"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\articles.test.js": {
+    "version": 2,
+    "hash": "766f57e188fb85822c0bde435c52ec70"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\auth.test.js": {
+    "version": 1,
+    "hash": "608964f93bac30963cc2a905858e3a40"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\comments.test.js": {
+    "version": 2,
+    "hash": "9e7a24805275e321953355723e91e84b"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\users.test.js": {
+    "version": 2,
+    "hash": "7a0733c220603d8f4f81df79481eab29"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\rateLimit.test.js": {
+    "version": 1,
+    "hash": "61130072a4a8fd4109dd6f6afd8286c2"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\rateLimit.js": {
+    "version": 1,
+    "hash": "320779dfa19942e9c8d0689a1d68bd84"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756657307658-499081012.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756657756825-346829626.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756660214711-314048676.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756660258451-415853295.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756666053549-600682487.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756666082989-109778181.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\jest.setup.js": {
+    "version": 1,
+    "hash": "27320cb03c7bc7ec2cb7a86908618976"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\jest-mongodb-config.js": {
+    "version": 1,
+    "hash": "4683f083ca028a7327e2f7d06b266566"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\sanitization.test.js": {
+    "version": 2,
+    "hash": "f8da9d1e66d7c7290de09ae3e97c36b1"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\utils\\sanitize.test.js": {
+    "version": 2,
+    "hash": "15474195412eb69de4b84ba4a0f5aeae"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\sanitizeMiddleware.js": {
+    "version": 2,
+    "hash": "4a313122253fc2be234e30cb08cc505f"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756744162941-217753623.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756744538323-605333134.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756744538482-68374677.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745272824-824896344.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745273002-44688382.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745273027-493877727.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745811922-747871621.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745812075-501152157.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745812104-105262893.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745873396-210006023.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745873555-546599603.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756745873579-506963760.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746218568-965732117.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746218719-971552728.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746218745-850609998.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746282522-535178564.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746282682-616618260.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746282706-178996590.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746481683-500058792.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746481836-337460984.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746481860-936692384.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746538450-581221730.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746538604-660689319.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746538627-560811603.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746717467-978772927.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746717622-669638575.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746717647-904674377.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746804710-597519531.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746804864-726654006.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756746804888-908441161.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748436539-837513395.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748436697-184509137.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748436720-644344373.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748591145-616193290.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748591309-857443350.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748591334-436700840.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748903181-441438040.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748903362-64697141.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756748903398-813462936.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749131394-563604330.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749131579-114911805.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749131608-175554828.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749401413-295028329.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749401601-994645613.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749401629-433218701.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  }
+}

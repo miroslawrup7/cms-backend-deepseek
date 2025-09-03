@@ -1,0 +1,52 @@
+const sanitizeHtml = require('sanitize-html');
+
+// 🚀 Tytuły – usuń całkowicie HTML, ale zachowaj tekst wewnątrz
+function sanitizeTitle(text) {
+  const s = String(text ?? '');
+  return sanitizeHtml(s, {
+    allowedTags: [], // brak dozwolonych tagów
+    allowedAttributes: {},
+    disallowedTagsMode: 'discard',
+    nonTextTags: ['script', 'style'], // usuwa całe tagi i zachowuje tylko tekst wewnątrz
+    textFilter: (txt, tagName) => txt, // zwraca tekst wewnątrz tagów
+  }).trim();
+}
+
+// 🚀 Treść artykułów – escapuj HTML (np. <b> → &lt;b&gt;)
+function sanitizeBody(html) {
+  const s = String(html ?? '');
+  return sanitizeHtml(s, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'escape', // escapowanie zamiast usuwania
+  }).trim();
+}
+
+// 🚀 Komentarze – escapuj HTML zamiast usuwać
+function sanitizeComment(str = '') {
+  return sanitizeHtml(String(str), {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'escape', // escapujemy HTML
+  }).trim();
+}
+
+// 🚀 Bardzo restrykcyjna sanitizacja, np. limity długości
+const STRICT_SANITIZE_CONFIG = {
+  allowedTags: [],
+  allowedAttributes: {},
+  disallowedTagsMode: 'discard',
+};
+
+function sanitizeStrict(text) {
+  return sanitizeHtml(String(text || ''), STRICT_SANITIZE_CONFIG)
+    .trim()
+    .substring(0, 500);
+}
+
+module.exports = {
+  sanitizeTitle,
+  sanitizeBody,
+  sanitizeComment,
+  sanitizeStrict,
+};

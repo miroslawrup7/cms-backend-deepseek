@@ -1,0 +1,71 @@
+const {
+  sanitizeTitle,
+  sanitizeBody,
+  sanitizeComment,
+  sanitizeStrict,
+} = require('../../utils/sanitize');
+
+describe('Utils: Sanityzacja danych', () => {
+  describe('sanitizeTitle', () => {
+    it('Powinien usuwać wszystkie tagi HTML', () => {
+      const input = '<script>alert("xss")</script>Tytuł <b>pogrubiony</b>';
+      expect(sanitizeTitle(input)).toBe('Tytuł pogrubiony');
+    });
+
+    it('Powinien trimować białe znaki', () => {
+      const input = '   Tytuł z spacjami   ';
+      expect(sanitizeTitle(input)).toBe('Tytuł z spacjami');
+    });
+  });
+
+  describe('sanitizeStrict', () => {
+    it('Powinien usuwać wszystkie tagi HTML', () => {
+      const input = '<script>alert("xss")</script>Tekst <b>pogrubiony</b>';
+      expect(sanitizeStrict(input)).toBe('Tekst pogrubiony');
+    });
+
+    it('Powinien ograniczać długość do 500 znaków', () => {
+      const longInput = 'A'.repeat(600);
+      expect(sanitizeStrict(longInput).length).toBe(500);
+    });
+
+    it('Powinien radzić sobie z null/undefined', () => {
+      expect(sanitizeStrict(null)).toBe('');
+      expect(sanitizeStrict(undefined)).toBe('');
+    });
+  });
+
+  describe('sanitizeBody', () => {
+    it('Powinien pozwalać na podstawowe tagi formatujące', () => {
+      const input =
+        '<p>Paragraf</p><b>pogrubienie</b><a href="https://example.com">link</a>';
+      const result = sanitizeBody(input);
+
+      expect(result).toContain('<p>');
+      expect(result).toContain('<b>');
+      expect(result).toContain('<a href="https://example.com"');
+      expect(result).not.toContain('<script>');
+    });
+
+    it('Powinien dodawać atrybuty bezpieczeństwa do linków', () => {
+      const input = '<a href="https://example.com">link</a>';
+      const result = sanitizeBody(input);
+
+      expect(result).toContain('target="_blank"');
+      expect(result).toContain('rel="noopener noreferrer nofollow ugc"');
+    });
+  });
+
+  describe('sanitizeComment', () => {
+    it('Powinien pozwalać na podstawowe formatowanie w komentarzach', () => {
+      const input =
+        '<b>pogrubienie</b> <i>kursywa</i> <a href="https://example.com">link</a>';
+      const result = sanitizeComment(input);
+
+      expect(result).toContain('<b>');
+      expect(result).toContain('<i>');
+      expect(result).toContain('<a');
+      expect(result).not.toContain('<script>');
+    });
+  });
+});

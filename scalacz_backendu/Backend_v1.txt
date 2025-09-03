@@ -1,0 +1,1882 @@
+Backend v.1
+
+==================================
+STRUKTURA PROJEKTU
+==================================
+
++ controllers
+  - adminController.js
+  - articleController.js
+  - authController.js
+  - commentController.js
+  - userController.js
++ middleware
+  - authMiddleware.js
+  - isAuthor.js
+  - isCommentAuthor.js
+  - requireAdmin.js
+  - requireAuth.js
+  - requireAuthorOrAdmin.js
+  - upload.js
++ models
+  - Article.js
+  - Comment.js
+  - PendingUser.js
+  - User.js
++ routes
+  - adminRoutes.js
+  - articleRoutes.js
+  - authRoutes.js
+  - commentRoutes.js
+  - userRoutes.js
++ uploads
+  - 1754068886780-2025-05-08_17-46-27(1)-01.jpg
+  - 1754152749228-92812186_3218584588186739_8353233957860409344_n.jpg
+  - 1754156567535-92989817_3218584841520047_9082093743397404672_n.jpg
+  - 1754241925862-92989817_3218584841520047_9082093743397404672_n.jpg
+  - 1754310977682-92812186_3218584588186739_8353233957860409344_n.jpg
+  - 1754310977688-92948159_3218584998186698_4977806751773491200_n.jpg
+  - 1754310977693-92989817_3218584841520047_9082093743397404672_n.jpg
+  - 1754310977698-93254356_3218584681520063_688158527956451328_n.jpg
+  - 1754310977702-93303604_3218584784853386_6430330249937944576_n.jpg
+  - 1754332478792-93254356_3218584681520063_688158527956451328_n.jpg
+  - 1754332492051-93254356_3218584681520063_688158527956451328_n.jpg
+  - 1754332582184-93303604_3218584784853386_6430330249937944576_n.jpg
+  - 1754332738296-92948159_3218584998186698_4977806751773491200_n.jpg
+  - 1754332774555-92989817_3218584841520047_9082093743397404672_n.jpg
+  - 1754367503118-93303604_3218584784853386_6430330249937944576_n.jpg
+  - 1754387409764-92948159_3218584998186698_4977806751773491200_n.jpg
+  - 1754462018664-415954181.jpg
+  - 1754462123958-301796897.jpg
+  - 1754462384224-743992369.jpg
+  - 1754462515056-53701265.jpg
+  - 1754466490832-679145436.jpg
+  - 1754487751546-136461086.jpg
+  - 1754487788362-92598928.jpg
+  - 1754487826811-398469964.jpg
+  - 1754487826814-856807431.jpg
+  - 1754487826816-273726342.jpg
+  - 1754488665308-463888655.jpg
+  - 1754491303538-69773656.jpg
+  - 1754497317961-377443572.jpg
+  - 1754497317966-945997040.jpg
++ utils
+  - emailTemplates.js
+  - mailer.js
+  - sanitize.js
+  - validate.js
+- .env
+- server.js
+
+==================================
+adminController.js v.1
+==================================
+
+const bcrypt = require('bcryptjs')
+const PendingUser = require('../models/PendingUser')
+const User = require('../models/User')
+const { sanitizeTitle } = require('../utils/sanitize')
+const { sendMail } = require('../utils/mailer')
+const { approvedUserEmail, rejectedUserEmail } = require('../utils/emailTemplates')
+
+// GET /api/admin/pending-users
+const getPendingUsers = async (req, res) => {
+  try {
+    const { search = '', page = 1, limit = 10 } = req.query
+
+    const query = {
+      $or: [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } }
+      ]
+    }
+
+    const skip = (parseInt(page) - 1) * parseInt(limit)
+
+    const [total, users] = await Promise.all([
+      PendingUser.countDocuments(query),
+      PendingUser.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+    ])
+
+    res.json({
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      users
+    })
+  } catch (err) {
+    console.error('Błąd pobierania oczekujących użytkowników:', err)
+    res.status(500).json({ message: 'Błąd serwera podczas pobierania wniosków.' })
+  }
+}
+
+
+// POST /api/admin/approve/:id
+const approveUser = async (req, res) => {
+  try {
+    const { id } = req.params
+    const pending = await PendingUser.findById(id)
+    if (!pending) return res.status(404).json({ message: 'Wniosek nie istnieje.' })
+
+    const exists = await User.findOne({ email: pending.email })
+    if (exists) {
+      await pending.deleteOne()
+      return res.status(400).json({ message: 'Email jest już zajęty w systemie.' })
+    }
+
+    const hashed = await bcrypt.hash(String(pending.password), 10)
+    const user = new User({
+      username: sanitizeTitle(pending.username),
+      email: pending.email,
+      password: hashed,
+      role: pending.role
+    })
+    await user.save()
+
+    await pending.deleteOne()
+
+    // wysyłka maila (best-effort)
+    try {
+      const tpl = approvedUserEmail({ username: user.username, email: user.email })
+      await sendMail({ to: user.email, subject: tpl.subject, text: tpl.text, html: tpl.html })
+    } catch (mailErr) {
+      console.warn('approveUser: mail send failed:', mailErr?.message || mailErr)
+    }
+
+    return res.json({ message: 'Użytkownik zatwierdzony i dodany do systemu.', userId: user._id })
+  } catch (err) {
+    console.error('Błąd approveUser:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// DELETE /api/admin/reject/:id
+const rejectUser = async (req, res) => {
+  try {
+    const { id } = req.params
+    const pending = await PendingUser.findById(id)
+    if (!pending) return res.status(404).json({ message: 'Wniosek nie istnieje.' })
+
+    // najpierw wyślij maila (opcjonalne – jeśli chcesz mimo braku maila kontynuować, trzymaj w try/catch)
+    try {
+      const tpl = rejectedUserEmail({ username: pending.username, email: pending.email })
+      await sendMail({ to: pending.email, subject: tpl.subject, text: tpl.text, html: tpl.html })
+    } catch (mailErr) {
+      console.warn('rejectUser: mail send failed:', mailErr?.message || mailErr)
+    }
+
+    await pending.deleteOne()
+    return res.json({ message: 'Wniosek został odrzucony.' })
+  } catch (err) {
+    console.error('Błąd rejectUser:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+module.exports = {
+  getPendingUsers,
+  approveUser,
+  rejectUser
+}
+
+
+==================================
+articleController.js v.1
+==================================
+
+// controllers/articleController.js
+const Article = require("../models/Article")
+const Comment = require("../models/Comment")
+const fs = require("fs")
+const path = require("path")
+const { sanitizeTitle, sanitizeBody } = require("../utils/sanitize")
+const validateFields = require("../utils/validate")
+
+// === Stałe i helpery ścieżek ===
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads')
+
+/**
+ * Zwraca publiczną ścieżkę do zasobu, jaką trzymamy w DB i serwujemy na froncie:
+ *   "uploads/<filename>" — ze slashem, bez leading slash.
+ * Obsługuje stare formy (pełne ścieżki z dysku lub wstępnie z "uploads/").
+ */
+function toPublicPath(p) {
+  if (!p) return null
+  const s = String(p).replace(/\\/g, '/')
+  if (s.startsWith('uploads/')) return s
+  const m = s.match(/uploads\/(.+)$/i)
+  return m ? `uploads/${m[1]}` : `uploads/${path.basename(s)}`
+}
+
+/**
+ * Zwraca relatywną nazwę pliku wewnątrz katalogu "uploads" (do kasowania na dysku).
+ * Przykłady:
+ *  - "uploads/a.jpg"       -> "a.jpg"
+ *  - "C:\...\uploads\a.jpg"-> "a.jpg"
+ *  - "a.jpg"               -> "a.jpg"
+ */
+function toUploadsRel(p) {
+  if (!p) return ''
+  const s = String(p)
+  const m = s.match(/uploads[\/\\]+(.+)$/i)
+  return m ? m[1] : path.basename(s)
+}
+
+// =========================
+//  POST /api/articles
+//  Tworzenie nowego artykułu
+// =========================
+const createArticle = async (req, res) => {
+  try {
+    let { title, content } = req.body
+
+    const errors = validateFields({
+      title:   [title,   'Tytuł jest wymagany'],
+      content: [content, 'Treść jest wymagana'],
+    })
+    if (title && title.length < 5)   errors.push('Tytuł musi mieć co najmniej 5 znaków')
+    if (content && content.length < 20) errors.push('Treść musi mieć co najmniej 20 znaków')
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    // sanitacja
+    title   = sanitizeTitle(title)
+    content = sanitizeBody(content)
+
+    // mapuj przesłane pliki na publiczne ścieżki "uploads/<filename>"
+    const imagePaths = (req.files || []).map(f => `uploads/${f.filename}`.replace(/\\/g, '/'))
+
+    // autoryzacja (powinna być zapewniona przez middleware, ale zostawiamy twardy check)
+    const author = req.user ? req.user._id : null
+    if (!author) {
+      // sprzątanie uploadów jeśli brak autoryzacji
+      imagePaths.forEach(rel => {
+        const full = path.join(UPLOADS_DIR, toUploadsRel(rel))
+        fs.unlink(full, () => {}) // ignorujemy błąd
+      })
+      return res.status(401).json({ message: "Nieautoryzowany dostęp" })
+    }
+
+    const newArticle = new Article({
+      title,
+      content,
+      images: imagePaths, // w DB trzymamy zawsze "uploads/<filename>"
+      author,
+    })
+
+    await newArticle.save()
+    return res.status(201).json({ message: "Artykuł utworzony", article: newArticle })
+  } catch (error) {
+    // sprzątanie uploadów jeśli posypało się dalej
+    if (req.files && req.files.length > 0) {
+      for (const f of req.files) {
+        const full = path.join(UPLOADS_DIR, toUploadsRel(f.filename || f.path))
+        fs.unlink(full, () => {})
+      }
+    }
+    console.error("Błąd tworzenia artykułu:", error)
+    return res.status(500).json({ message: "Błąd serwera" })
+  }
+}
+
+// =============================================
+//  GET /api/articles?page=&limit=&q=&sort=
+//  Lista artykułów z filtrem/sortem/paginacją
+// =============================================
+const getArticles = async (req, res) => {
+  try {
+    const page  = parseInt(req.query.page)  || 1
+    const limit = parseInt(req.query.limit) || 5
+    const skip  = (page - 1) * limit
+
+    // filtrowanie (q po tytule/treści)
+    const rawQ = (req.query.q || '').trim().slice(0, 100)
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const filter = rawQ
+      ? { $or: [
+          { title:   { $regex: esc(rawQ), $options: 'i' } },
+          { content: { $regex: esc(rawQ), $options: 'i' } },
+        ] }
+      : {}
+
+    // sortowanie
+    const sortParam = (req.query.sort || 'newest')
+    const sortMap = {
+      newest:  { createdAt: -1 },
+      oldest:  { createdAt:  1 },
+      titleAZ: { title:      1, createdAt: -1 },
+      titleZA: { title:     -1, createdAt: -1 },
+      // mostLiked osobno
+    }
+
+    if (sortParam === 'mostLiked') {
+      const pipeline = [
+        { $match: filter },
+        { $addFields: { likesCount: { $size: { $ifNull: ['$likes', []] } } } },
+        { $sort: { likesCount: -1, createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        { $project: {
+            title: 1, content: 1, images: 1, createdAt: 1, author: 1, likes: 1, likesCount: 1
+        } }
+      ]
+      const articlesRaw = await Article.aggregate(pipeline)
+      const total = await Article.countDocuments(filter)
+
+      const articles = await Promise.all(articlesRaw.map(async (a) => {
+        const commentCount = await Comment.countDocuments({ article: a._id })
+        return {
+          _id: a._id,
+          title: a.title,
+          content: a.content,
+          likesCount: a.likesCount,
+          commentCount,
+          createdAt: a.createdAt,
+          author: a.author,
+          thumbnail: (a.images && a.images.length > 0)
+            ? toPublicPath(a.images[0])
+            : null,
+        }
+      }))
+
+      return res.json({ articles, total })
+    }
+
+    // zwykłe sortowanie
+    const articlesRaw = await Article.find(filter)
+      .sort(sortMap[sortParam] || sortMap.newest)
+      .skip(skip)
+      .limit(limit)
+      .populate('author', 'email')
+
+    const articles = await Promise.all(articlesRaw.map(async (article) => {
+      const commentCount = await Comment.countDocuments({ article: article._id })
+      return {
+        _id: article._id,
+        title: article.title,
+        content: article.content,
+        likesCount: Array.isArray(article.likes) ? article.likes.length : 0,
+        commentCount,
+        createdAt: article.createdAt,
+        author: article.author, // {_id, email}
+        thumbnail: (article.images && article.images.length > 0)
+          ? toPublicPath(article.images[0])
+          : null,
+      }
+    }))
+
+    const total = await Article.countDocuments(filter)
+    return res.json({ articles, total })
+  } catch (error) {
+    console.error('Błąd pobierania artykułów:', error)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// ===================================
+//  GET /api/articles/:id
+//  Pojedynczy artykuł
+// ===================================
+const getArticleById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const article = await Article.findById(id).populate("author", "username email")
+    if (!article) return res.status(404).json({ message: "Nie znaleziono artykułu" })
+
+    // policz komentarze
+    const commentCount = await Comment.countDocuments({ article: article._id })
+
+    // znormalizuj obrazy na wyjściu (też dla starych rekordów)
+    const out = article.toObject()
+    out.images = Array.isArray(out.images) ? out.images.map(toPublicPath) : []
+    out.commentCount = commentCount
+
+    return res.status(200).json(out)
+  } catch (err) {
+    console.error("Błąd pobierania artykułu:", err)
+    return res.status(500).json({ message: "Błąd serwera" })
+  }
+}
+
+
+// ===================================
+//  PUT /api/articles/:id
+//  Aktualizacja artykułu
+// ===================================
+const updateArticle = async (req, res) => {
+  try {
+    let { title, content, removeImages } = req.body
+    const article = await Article.findById(req.params.id)
+    if (!article) return res.status(404).json({ message: "Artykuł nie znaleziony" })
+
+    // (jeśli w trasie używasz requireAuthorOrAdmin, to i tak mamy zabezpieczenie)
+    if (String(article.author) !== String(req.user._id) && req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Brak uprawnień do edycji" })
+    }
+
+    // które obrazy usunąć?
+    let imagesToRemove = []
+    if (typeof removeImages === "string") imagesToRemove = [removeImages]
+    else if (Array.isArray(removeImages)) imagesToRemove = removeImages
+
+    const normalizedToRemove = imagesToRemove.map(toUploadsRel)
+
+    // usuń z dysku
+    for (const rel of normalizedToRemove) {
+      const full = path.join(UPLOADS_DIR, rel)
+      if (full.startsWith(UPLOADS_DIR)) {
+        fs.unlink(full, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error(`Błąd usuwania pliku: ${full}`, err)
+          }
+        })
+      }
+    }
+
+    // usuń z listy w dokumencie
+    article.images = (article.images || []).filter(img => {
+      const rel = toUploadsRel(img)
+      return !normalizedToRemove.includes(rel)
+    })
+
+    // dodaj nowe
+    if (req.files && req.files.length > 0) {
+      const newImages = req.files.map(f => `uploads/${f.filename}`.replace(/\\/g, '/'))
+      article.images.push(...newImages)
+    }
+
+    // walidacja + sanitacja
+    const errors = []
+    if (title) {
+      if (title.length < 5) errors.push("Tytuł musi mieć co najmniej 5 znaków")
+      else article.title = sanitizeTitle(title)
+    }
+    if (content) {
+      if (content.length < 20) errors.push("Treść musi mieć co najmniej 20 znaków")
+      else article.content = sanitizeBody(content)
+    }
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    await article.save()
+    return res.json({ message: "Artykuł zaktualizowany", article })
+  } catch (err) {
+    console.error("Błąd aktualizacji artykułu:", err)
+    return res.status(500).json({ message: "Błąd serwera" })
+  }
+}
+
+// ===================================
+//  DELETE /api/articles/:id
+//  Usunięcie artykułu
+// ===================================
+const deleteArticle = async (req, res) => {
+  try {
+    const article = await Article.findById(req.params.id)
+    if (!article) return res.status(404).json({ message: "Artykuł nie istnieje" })
+
+    const isOwner = String(article.author) === String(req.user._id)
+    const isAdmin = req.user.role === 'admin'
+    if (!isOwner && !isAdmin) return res.status(403).json({ message: "Brak uprawnień" })
+
+    // usuń pliki z dysku
+    for (const img of (article.images || [])) {
+      const rel = toUploadsRel(img)
+      const full = path.join(UPLOADS_DIR, rel)
+      if (full.startsWith(UPLOADS_DIR)) {
+        fs.unlink(full, (err) => {
+          if (err && err.code !== 'ENOENT') {
+            console.error(`Błąd usuwania pliku ${full}:`, err)
+          }
+        })
+      }
+    }
+
+    // usuń komentarze
+    await Comment.deleteMany({ article: article._id })
+
+    await article.deleteOne()
+    return res.status(204).end()
+  } catch (err) {
+    console.error("Błąd usuwania artykułu:", err)
+    return res.status(500).json({ message: "Błąd serwera" })
+  }
+}
+
+// ===================================
+//  POST /api/articles/:id/like
+//  Polub/odlubi artykuł
+// ===================================
+const toggleLikeArticle = async (req, res) => {
+  try {
+    const articleId = req.params.id
+    const userId = req.user._id
+
+    const article = await Article.findById(articleId)
+    if (!article) return res.status(404).json({ message: "Artykuł nie znaleziony" })
+
+    // Autor nie może lajkować własnego artykułu
+    if (article.author && String(article.author) === String(req.user._id)) {
+      return res.status(400).json({
+        message: 'Autor nie może polubić własnego artykułu',
+        liked: false,
+        totalLikes: Array.isArray(article.likes) ? article.likes.length : 0
+      })
+    }
+
+    const alreadyLiked = Array.isArray(article.likes) && article.likes.some(id => String(id) === String(userId))
+    if (alreadyLiked) article.likes.pull(userId)
+    else article.likes.push(userId)
+
+    await article.save()
+
+    return res.json({
+      liked: !alreadyLiked,
+      totalLikes: Array.isArray(article.likes) ? article.likes.length : 0
+    })
+  } catch (error) {
+    console.error("Błąd toggle lajka artykułu:", error)
+    return res.status(500).json({ message: "Błąd serwera" })
+  }
+}
+
+module.exports = {
+  createArticle,
+  getArticles,
+  getArticleById,
+  updateArticle,
+  deleteArticle,
+  toggleLikeArticle,
+}
+
+
+==================================
+authController.js v.1
+==================================
+
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
+const User = require('../models/User')
+const PendingUser = require('../models/PendingUser')
+const validateFields = require('../utils/validate')
+
+// ZMIANA 1: Uproszczono baseCookieOptions dla lokalnego środowiska
+const baseCookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax', // ZMIANA 2: 'lax' zamiast 'none' (Render wymagał 'none' dla cross-site)
+  secure: false,   // ZMIANA 3: false zamiast true (lokalnie bez HTTPS)
+  path: '/'
+}
+
+// Rejestracja — użytkownik oczekujący na zatwierdzenie
+const registerPending = async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body
+
+    const errors = validateFields({
+      username: [username, 'Nazwa użytkownika jest wymagana.'],
+      email:    [email, 'Email jest wymagany.'],
+      password: [password, 'Hasło jest wymagane.'],
+      role:     [role, 'Rola jest wymagana.']
+    })
+    if (errors.length > 0) return res.status(400).json({ message: errors.join(' ') })
+
+    const exists     = await PendingUser.findOne({ email })
+    const existsReal = await User.findOne({ email })
+    if (exists || existsReal) return res.status(400).json({ message: 'Email jest już zajęty.' })
+
+    const pendingUser = new PendingUser({ username, email, password, role })
+    await pendingUser.save()
+    res.status(201).json({ message: 'Wniosek o rejestrację został przesłany.' })
+  } catch (error) {
+    res.status(500).json({ message: 'Błąd serwera.', error })
+  }
+}
+
+// Logowanie
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body
+
+    const errors = validateFields({
+      email:    [email, 'Email jest wymagany.'],
+      password: [password, 'Hasło jest wymagane.']
+    })
+    if (errors.length > 0) return res.status(400).json({ message: errors.join(' ') })
+
+    const user = await User.findOne({ email })
+    if (!user) return res.status(400).json({ message: 'Nieprawidłowy email lub hasło.' })
+
+    const isMatch = await bcrypt.compare(password, user.password)
+    if (!isMatch) return res.status(400).json({ message: 'Nieprawidłowy email lub hasło.' })
+
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' })
+
+    res.cookie('token', token, {
+      ...baseCookieOptions,
+      maxAge: 24 * 60 * 60 * 1000 // 1 dzień
+    })
+
+    res.json({ message: 'Zalogowano pomyślnie.' })
+  } catch (error) {
+    res.status(500).json({ message: 'Błąd serwera.', error })
+  }
+}
+
+// Wylogowanie
+const logout = (req, res) => {
+  res.clearCookie('token', {
+    ...baseCookieOptions
+  })
+  res.json({ message: 'Wylogowano.' })
+}
+
+module.exports = {
+  registerPending,
+  login,
+  logout
+}
+
+==================================
+commentController.js v.1
+==================================
+
+// controllers/commentController.js
+const Comment = require('../models/Comment')
+const Article = require('../models/Article')
+const validateFields = require('../utils/validate')
+const { sanitizeBody, sanitizeComment } = require('../utils/sanitize')
+
+// POST /api/comments/:id  (id = articleId)
+const addComment = async (req, res) => {
+  try {
+    const articleId = req.params.id
+    const raw = req.body?.text ?? ''
+
+    // wstępna walidacja (puste)
+    const errors = validateFields({ text: [raw, 'Komentarz nie może być pusty.'] })
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    // sanitacja (usuwa <script>, zostawia linki z target/rel)
+    const text = sanitizeComment(raw)
+
+    // walidacja po sanitacji (ważne w przypadku, gdy wszystko wycięto)
+    const plain = text.replace(/<[^>]+>/g, '').trim()
+    if (!plain) {
+      return res.status(400).json({ message: 'Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.' })
+    }
+    if (plain.length < 6) {
+      return res.status(400).json({ message: 'Komentarz musi mieć co najmniej 6 znaków.' })
+    }
+
+    // sprawdź istnienie artykułu
+    const article = await Article.findById(articleId)
+    if (!article) return res.status(404).json({ message: 'Nie znaleziono artykułu.' })
+
+    const comment = await Comment.create({
+      text,                // zapisujemy zbezpieczone HTML
+      article: articleId,
+      author: req.user._id
+    })
+
+    return res.status(201).json(comment)
+  } catch (error) {
+    console.error('Błąd podczas dodawania komentarza:', error)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// GET /api/comments/:id  (id = articleId)
+const getComments = async (req, res) => {
+  try {
+    const articleId = req.params.id
+    const comments = await Comment.find({ article: articleId })
+      .populate('author', 'username')
+      .sort({ createdAt: -1 })
+
+    return res.json(comments)
+  } catch (error) {
+    console.error('Błąd podczas pobierania komentarzy:', error)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// PUT /api/comments/:id  (id = commentId)
+const updateComment = async (req, res) => {
+  try {
+    const commentId = req.params.id
+    const raw = req.body?.text ?? ''
+
+    // wstępna walidacja (puste)
+    const errors = []
+    if (raw == null || String(raw).trim() === '') errors.push('Komentarz nie może być pusty.')
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    // sanitacja + walidacja po sanitacji
+    const text = sanitizeComment(raw)
+    const plain = text.replace(/<[^>]+>/g, '').trim()
+    if (!plain) {
+      return res.status(400).json({ message: 'Komentarz jest pusty po odfiltrowaniu niebezpiecznych elementów.' })
+    }
+    if (plain.length < 6) {
+      return res.status(400).json({ message: 'Komentarz musi mieć co najmniej 6 znaków.' })
+    }
+
+    const comment = await Comment.findById(commentId)
+    if (!comment) return res.status(404).json({ message: 'Komentarz nie istnieje.' })
+
+    const isAuthor = String(comment.author) === String(req.user._id)
+    const isAdmin = req.user.role === 'admin'
+    if (!isAuthor && !isAdmin) return res.status(403).json({ message: 'Brak uprawnień do edycji komentarza.' })
+
+    comment.text = text
+    await comment.save()
+
+    return res.json(comment)
+  } catch (error) {
+    console.error('Błąd podczas edycji komentarza:', error)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// DELETE /api/comments/:id  (id = commentId)
+const deleteComment = async (req, res) => {
+  try {
+    const commentId = req.params.id
+    const comment = await Comment.findById(commentId)
+    if (!comment) return res.status(404).json({ message: 'Komentarz nie istnieje.' })
+
+    const isAuthor = String(comment.author) === String(req.user._id)
+    const isAdmin = req.user.role === 'admin'
+    if (!isAuthor && !isAdmin) return res.status(403).json({ message: 'Brak uprawnień do usunięcia komentarza.' })
+
+    await comment.deleteOne()
+    return res.status(204).end()
+  } catch (error) {
+    console.error('Błąd podczas usuwania komentarza:', error)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+module.exports = { addComment, getComments, updateComment, deleteComment }
+
+
+==================================
+userController.js v.1
+==================================
+
+// controllers/userController.js
+const bcrypt = require('bcryptjs')
+const User = require('../models/User')
+const validateFields = require('../utils/validate')
+const sanitize = require('sanitize-html')
+
+// GET /api/users/profile
+const getProfile = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' })
+    const user = await User.findById(req.user._id).select('-password')
+    if (!user) return res.status(404).json({ message: 'Użytkownik nie istnieje' })
+    return res.json(user)
+  } catch (err) {
+    console.error('Błąd getProfile:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// PUT /api/users/profile
+const updateProfile = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' })
+
+    let { username } = req.body
+    const errors = []
+
+    if (username != null) {
+      username = String(username).trim()
+      if (username.length < 3) errors.push('Nazwa użytkownika musi mieć co najmniej 3 znaki.')
+    }
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ message: 'Użytkownik nie istnieje' })
+
+    if (username != null) user.username = sanitize(username)
+    await user.save()
+
+    const safe = user.toObject()
+    delete safe.password
+    return res.json({ message: 'Profil zaktualizowany', user: safe })
+  } catch (err) {
+    console.error('Błąd updateProfile:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// PUT /api/users/password
+const changePassword = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' })
+
+    const { oldPassword, newPassword } = req.body
+    const errors = validateFields({
+      oldPassword: [oldPassword, 'Stare hasło jest wymagane.'],
+      newPassword: [newPassword, 'Nowe hasło jest wymagane.']
+    })
+    if (newPassword && String(newPassword).length < 6) {
+      errors.push('Nowe hasło musi mieć co najmniej 6 znaków.')
+    }
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    const user = await User.findById(req.user._id)
+    if (!user) return res.status(404).json({ message: 'Użytkownik nie istnieje' })
+
+    const ok = await bcrypt.compare(String(oldPassword), user.password)
+    if (!ok) return res.status(400).json({ message: 'Stare hasło jest nieprawidłowe.' })
+
+    user.password = await bcrypt.hash(String(newPassword), 10)
+    await user.save()
+    return res.json({ message: 'Hasło zostało zmienione.' })
+  } catch (err) {
+    console.error('Błąd changePassword:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+/* ====== Admin (role check usunięty – robi to requireAdmin) ====== */
+
+// GET /api/users
+const listUsers = async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password').sort({ createdAt: -1 })
+    return res.json(users)
+  } catch (err) {
+    console.error('Błąd listUsers:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// PUT /api/users/:id/role
+const changeRole = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { role } = req.body
+
+    const errors = validateFields({ role: [role, 'Rola jest wymagana.'] })
+    if (errors.length) return res.status(400).json({ message: errors.join(' ') })
+
+    const allowed = ['user', 'author', 'admin']
+    if (!allowed.includes(String(role))) {
+      return res.status(400).json({ message: 'Nieprawidłowa rola.' })
+    }
+
+    const user = await User.findById(id)
+    if (!user) return res.status(404).json({ message: 'Użytkownik nie istnieje.' })
+
+    user.role = role
+    await user.save()
+
+    const safe = user.toObject()
+    delete safe.password
+    return res.json({ message: 'Rola zaktualizowana.', user: safe })
+  } catch (err) {
+    console.error('Błąd changeRole:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+// DELETE /api/users/:id
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params
+    const user = await User.findById(id)
+    if (!user) return res.status(404).json({ message: 'Użytkownik nie istnieje.' })
+
+    await user.deleteOne()
+    return res.status(204).end()
+  } catch (err) {
+    console.error('Błąd deleteUser:', err)
+    return res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+module.exports = {
+  getProfile,
+  updateProfile,
+  changePassword,
+  // admin:
+  listUsers,
+  changeRole,
+  deleteUser,
+}
+
+
+==================================
+authMiddleware.js v.1
+==================================
+
+const jwt = require('jsonwebtoken')
+const User = require('../models/User')
+
+// Middleware sprawdzający czy użytkownik jest zalogowany i ważny token
+const requireAuth = async (req, res, next) => {
+  const token = req.cookies.token
+
+  if (!token) {
+    return res.status(401).json({ message: 'Brak tokena. Dostęp zabroniony.' })
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+    const user = await User.findById(decoded.id).select('-password')
+    
+    if (!user) {
+      return res.status(401).json({ message: 'Użytkownik nie istnieje' })
+    }
+
+    req.user = user
+    next()
+  } catch (error) {
+    console.error('Błąd autoryzacji:', error)
+    return res.status(401).json({ message: 'Nieprawidłowy token.' })
+  }
+}
+
+module.exports = requireAuth
+
+
+==================================
+isAuthor.js v.1
+==================================
+
+// middleware/isAuthor.js
+const Article = require('../models/Article')
+
+const isAuthor = async (req, res, next) => {
+  try {
+    const article = await Article.findById(req.params.id)
+
+    if (!article) {
+      return res.status(404).json({ message: 'Artykuł nie znaleziony' })
+    }
+
+    if (article.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Brak uprawnień do edycji lub usunięcia tego artykułu' })
+    }
+
+    next()
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+module.exports = isAuthor
+
+
+==================================
+isCommentAuthor.js v.1
+==================================
+
+// middleware/isCommentAuthor.js
+const Comment = require('../models/Comment')
+
+const isCommentAuthor = async (req, res, next) => {
+  try {
+    const comment = await Comment.findById(req.params.id)
+    if (!comment) return res.status(404).json({ message: 'Komentarz nie znaleziony' })
+
+    if (comment.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Brak uprawnień do wykonania tej operacji' })
+    }
+
+    next()
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Błąd serwera' })
+  }
+}
+
+module.exports = isCommentAuthor
+
+
+==================================
+requireAdmin.js v.1
+==================================
+
+// Sprawdza, czy zalogowany użytkownik jest adminem
+module.exports = (req, res, next) => {
+    if (!req.user) {
+        return res.status(401).json({ message: "Brak autoryzacji" })
+    }
+    if (req.user.role !== "admin") {
+        return res.status(403).json({ message: "Brak dostępu — wymagane uprawnienia administratora" })
+    }
+    next()
+}
+
+
+==================================
+requireAuth.js v.1
+==================================
+
+// middleware/requireAuth.js
+const jwt = require('jsonwebtoken')
+const User = require('../models/User')
+
+const requireAuth = async (req, res, next) => {
+  const token = req.cookies.token
+
+  if (!token) {
+    return res.status(401).json({ message: 'Brak tokena. Dostęp zabroniony.' })
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET)
+
+    req.user = await User.findById(decoded.id).select('-password')
+    next()
+  } catch (error) {
+    console.error('Błąd autoryzacji:', error)
+    return res.status(401).json({ message: 'Nieprawidłowy token.' })
+  }
+}
+
+module.exports = requireAuth
+
+
+==================================
+requireAuthorOrAdmin.js v.1
+==================================
+
+// middleware/requireAuthorOrAdmin.js
+const Article = require('../models/Article')
+
+module.exports = async function requireAuthorOrAdmin(req, res, next) {
+  try {
+    const { id } = req.params
+    const article = await Article.findById(id)
+    if (!article) return res.status(404).json({ message: 'Artykuł nie istnieje.' })
+
+    const isOwner = String(article.author) === String(req.user._id)
+    const isAdmin = req.user.role === 'admin'
+    if (!isOwner && !isAdmin) {
+      return res.status(403).json({ message: 'Brak uprawnień.' })
+    }
+
+    // Możesz przekazać dalej, jeśli chcesz użyć w kontrolerze:
+    req.article = article
+    return next()
+  } catch (e) {
+    return next(e)
+  }
+}
+
+
+==================================
+upload.js v.1
+==================================
+
+// middleware/upload.js
+const multer = require('multer')
+const path = require('path')
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '..', 'uploads'))
+  },
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9)
+    const ext = path.extname(file.originalname || '')
+    cb(null, `${unique}${ext}`)
+  }
+})
+
+function fileFilter(req, file, cb) {
+  if (!file.mimetype || !file.mimetype.startsWith('image/')) {
+    return cb(new Error('Dozwolone są tylko pliki graficzne.'), false)
+  }
+  cb(null, true)
+}
+
+const upload = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: 5 * 1024 * 1024, files: 5 } // 5MB, max 5 plików
+})
+
+module.exports = upload
+
+
+==================================
+Article.js v.1
+==================================
+
+const mongoose = require("mongoose")
+
+const articleSchema = new mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    content: {
+      type: String,
+      required: true
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true
+    },
+    images: [{ type: String }],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }]
+  },
+  {
+    timestamps: true // createdAt, updatedAt
+  }
+)
+
+module.exports = mongoose.model("Article", articleSchema)
+
+
+==================================
+Comment.js v.1
+==================================
+
+const mongoose = require("mongoose")
+
+// Schemat komentarza - powiązany z artykułem i autorem
+const commentSchema = new mongoose.Schema({
+  article: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Article",
+    required: true,
+  },
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  text: {
+    type: String,
+    required: true,
+    trim: true,
+  },
+  likes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  createdAt: {
+    type: Date,
+    default: Date.now,
+  },
+})
+
+module.exports = mongoose.model("Comment", commentSchema)
+
+
+==================================
+PendingUser.js v.1
+==================================
+
+const mongoose = require("mongoose")
+
+const pendingUserSchema = new mongoose.Schema({
+    username: { type: String, required: true, trim: true },
+    email: {
+        type: String,
+        required: true,
+        unique: true,
+        trim: true,
+        lowercase: true,
+        match: /^[\w.-]+@([\w-]+\.)+[\w-]{2,4}$/
+    },
+    password: { type: String, required: true },
+    role: {
+        type: String,
+        enum: ["user", "author", "author"],
+        default: "user"
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
+})
+
+module.exports = mongoose.model("PendingUser", pendingUserSchema)
+
+
+==================================
+User.js v.1
+==================================
+
+const mongoose = require("mongoose")
+const bcrypt = require("bcryptjs")
+
+// Schemat użytkownika z podstawowymi danymi
+const userSchema = new mongoose.Schema({
+  username: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, "Nieprawidłowy format adresu e-mail"]
+  },
+  password: {
+    type: String,
+    required: true,
+    minlength: 6,
+  },
+  role: {
+    type: String,
+    enum: ["user", "author", "admin"],
+    default: "user"
+  }
+})
+
+// Middleware Mongoose - przed zapisem hashuje hasło, jeśli zostało zmienione
+userSchema.pre("save", async function(next) {
+  if (!this.isModified("password")) return next()
+
+  // jeśli to już hash bcrypt (~60 znaków, zaczyna się od $2a/$2b/$2y) – nie hashuj ponownie
+  const isBcrypt = typeof this.password === "string" && /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(this.password)
+  if (isBcrypt) return next()
+
+  const salt = await bcrypt.genSalt(10)
+  this.password = await bcrypt.hash(this.password, salt)
+  next()
+})
+
+// Metoda instancji do porównania hasła w trakcie logowania
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password)
+}
+
+module.exports = mongoose.model("User", userSchema)
+
+
+==================================
+adminRoutes.js v.1
+==================================
+
+const express = require('express')
+const router = express.Router()
+const requireAuth = require('../middleware/authMiddleware')
+const requireAdmin = require('../middleware/requireAdmin')
+
+const {
+  getPendingUsers,
+  approveUser,
+  rejectUser
+} = require('../controllers/adminController')
+
+router.get('/pending-users', requireAuth, requireAdmin, getPendingUsers)
+router.post('/approve/:id', requireAuth, requireAdmin, approveUser)
+router.delete('/reject/:id', requireAuth, requireAdmin, rejectUser)
+
+module.exports = router
+
+==================================
+articleRoutes.js v.1
+==================================
+
+// routes/articleRoutes.js
+const express = require("express")
+const router = express.Router()
+
+const {
+  createArticle,
+  getArticles,
+  getArticleById,
+  updateArticle,
+  deleteArticle,
+  toggleLikeArticle
+} = require("../controllers/articleController")
+
+const upload = require("../middleware/upload")
+const requireAuth = require("../middleware/authMiddleware")
+const requireAuthorOrAdmin = require("../middleware/requireAuthorOrAdmin")
+
+// Lista i pojedynczy artykuł
+router.get("/", getArticles)
+router.get("/:id", getArticleById)
+
+// Tworzenie / edycja / usuwanie (z autoryzacją)
+router.post("/", requireAuth, upload.array("images", 5), createArticle)
+router.put("/:id", requireAuth, requireAuthorOrAdmin, upload.array("images", 5), updateArticle)
+router.delete("/:id", requireAuth, requireAuthorOrAdmin, deleteArticle)
+
+// Lajk artykułu
+router.post("/:id/like", requireAuth, toggleLikeArticle)
+
+module.exports = router
+
+
+==================================
+authRoutes.js v.1
+==================================
+
+const express = require("express")
+const router = express.Router()
+const { login, logout, registerPending } = require("../controllers/authController")
+
+
+
+// Logowanie
+router.post("/login", login)
+
+// Wylogowanie
+router.post("/logout", logout)
+
+router.post("/register-pending", registerPending)
+
+module.exports = router
+
+
+==================================
+commentRoutes.js v.1
+==================================
+
+const express = require('express')
+const router = express.Router()
+
+const {
+  addComment,
+  getComments,
+  deleteComment,
+  updateComment, // zostaw, jeśli dodałeś w kontrolerze; w przeciwnym razie usuń tę linię i trasę PUT
+} = require('../controllers/commentController')
+
+const requireAuth = require('../middleware/authMiddleware') // ✔️ poprawna ścieżka i import
+
+// Komentarze do artykułu (id = articleId)
+router.get('/:id', getComments)                 // pobiera komentarze do artykułu :id
+router.post('/:id', requireAuth, addComment)    // dodaje komentarz do artykułu :id
+
+// Operacje na konkretnym komentarzu (id = commentId)
+router.put('/:id', requireAuth, updateComment)      // jeśli masz updateComment; inaczej usuń
+router.delete('/:id', requireAuth, deleteComment)
+
+module.exports = router
+
+
+==================================
+userRoutes.js v.1
+==================================
+
+const express = require('express')
+const router = express.Router()
+
+const requireAuth = require('../middleware/authMiddleware')
+const requireAdmin = require('../middleware/requireAdmin')
+
+const {
+  getProfile,
+  updateProfile,
+  changePassword,
+  listUsers,
+  changeRole,
+  deleteUser,
+} = require('../controllers/userController')
+
+// Profil zalogowanego użytkownika
+router.get('/profile', requireAuth, getProfile)
+router.put('/profile', requireAuth, updateProfile)
+router.put('/password', requireAuth, changePassword)
+
+// Admin – tylko dla roli 'admin'
+router.get('/',        requireAuth, requireAdmin, listUsers)
+router.put('/:id/role',requireAuth, requireAdmin, changeRole)
+router.delete('/:id',  requireAuth, requireAdmin, deleteUser)
+
+module.exports = router
+
+
+==================================
+1754068886780-2025-05-08_17-46-27(1)-01.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754152749228-92812186_3218584588186739_8353233957860409344_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754156567535-92989817_3218584841520047_9082093743397404672_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754241925862-92989817_3218584841520047_9082093743397404672_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754310977682-92812186_3218584588186739_8353233957860409344_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754310977688-92948159_3218584998186698_4977806751773491200_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754310977693-92989817_3218584841520047_9082093743397404672_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754310977698-93254356_3218584681520063_688158527956451328_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754310977702-93303604_3218584784853386_6430330249937944576_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754332478792-93254356_3218584681520063_688158527956451328_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754332492051-93254356_3218584681520063_688158527956451328_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754332582184-93303604_3218584784853386_6430330249937944576_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754332738296-92948159_3218584998186698_4977806751773491200_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754332774555-92989817_3218584841520047_9082093743397404672_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754367503118-93303604_3218584784853386_6430330249937944576_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754387409764-92948159_3218584998186698_4977806751773491200_n.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754462018664-415954181.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754462123958-301796897.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754462384224-743992369.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754462515056-53701265.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754466490832-679145436.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754487751546-136461086.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754487788362-92598928.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754487826811-398469964.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754487826814-856807431.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754487826816-273726342.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754488665308-463888655.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754491303538-69773656.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754497317961-377443572.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+1754497317966-945997040.jpg v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+emailTemplates.js v.1
+==================================
+
+// utils/emailTemplates.js
+const { APP_NAME = 'CMS' } = process.env
+
+function approvedUserEmail({ username, email }) {
+  const subject = `[${APP_NAME}] Twoje konto zostało zatwierdzone`
+  const text = `Cześć ${username || ''},
+
+Twoje konto w ${APP_NAME} zostało zatwierdzone. Możesz się teraz zalogować.
+
+Pozdrawiamy,
+Zespół ${APP_NAME}
+`
+  const html = `
+  <p>Cześć ${username || ''},</p>
+  <p>Twoje konto w <b>${APP_NAME}</b> zostało <b>zatwierdzone</b>. Możesz się teraz zalogować.</p>
+  <p>Pozdrawiamy,<br>Zespół ${APP_NAME}</p>
+  `
+  return { subject, text, html }
+}
+
+function rejectedUserEmail({ username, email }) {
+  const subject = `[${APP_NAME}] Wniosek rejestracyjny odrzucony`
+  const text = `Cześć ${username || ''},
+
+Niestety Twój wniosek rejestracyjny do ${APP_NAME} został odrzucony.
+
+Pozdrawiamy,
+Zespół ${APP_NAME}
+`
+  const html = `
+  <p>Cześć ${username || ''},</p>
+  <p>Niestety Twój wniosek rejestracyjny do <b>${APP_NAME}</b> został odrzucony.</p>
+  <p>Pozdrawiamy,<br>Zespół ${APP_NAME}</p>
+  `
+  return { subject, text, html }
+}
+
+module.exports = { approvedUserEmail, rejectedUserEmail }
+
+
+==================================
+mailer.js v.1
+==================================
+
+// utils/mailer.js
+const nodemailer = require('nodemailer')
+
+const {
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_SECURE,
+  SMTP_USER,
+  SMTP_PASS,
+  MAIL_FROM = 'no-reply@example.com'
+} = process.env
+
+// pojedynczy transport – wielokrotne użycie
+const transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: Number(SMTP_PORT) || 587,
+  secure: String(SMTP_SECURE) === 'true',
+  auth: SMTP_USER && SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
+})
+
+// prosta funkcja wysyłki
+async function sendMail({ to, subject, text, html }) {
+  if (!to) throw new Error('Brak adresata (to)')
+  const info = await transporter.sendMail({
+    from: MAIL_FROM,
+    to,
+    subject,
+    text,
+    html
+  })
+  return info
+}
+
+module.exports = { sendMail, transporter }
+
+
+==================================
+sanitize.js v.1
+==================================
+
+const sanitizeHtml = require('sanitize-html')
+
+// Tytuły: bez HTML
+function sanitizeTitle(text) {
+  const s = String(text ?? '')
+  return sanitizeHtml(s, { allowedTags: [], allowedAttributes: {} }).trim()
+}
+
+// Treść artykułu: lekki whitelist (proste formatowanie + linki)
+const BODY_CFG = {
+  allowedTags: [
+    'b','i','em','strong',
+    'a',
+    'p','br','ul','ol','li',
+    'blockquote','code','pre'
+  ],
+  allowedAttributes: {
+    a: ['href', 'title', 'target', 'rel']
+  },
+  allowedSchemes: ['http', 'https', 'mailto'],
+  disallowedTagsMode: 'discard',
+  transformTags: {
+    a: (tagName, attribs) => ({
+      tagName: 'a',
+      attribs: {
+        ...attribs,
+        target: '_blank',
+        rel: 'noopener noreferrer nofollow ugc'
+      }
+    })
+  }
+}
+
+function sanitizeBody(html) {
+  const s = String(html ?? '')
+  return sanitizeHtml(s, BODY_CFG).trim()
+}
+
+// Komentarze: jeszcze prostszy whitelist (tekst + linki)
+function sanitizeComment(str = '') {
+  return sanitizeHtml(String(str), {
+    allowedTags: ['b','i','em','strong','u','br','a'],
+    allowedAttributes: { a: ['href', 'title', 'target', 'rel'] },
+    allowedSchemes: ['http', 'https', 'mailto'],
+    disallowedTagsMode: 'discard',
+    transformTags: {
+      a: (tagName, attribs) => ({
+        tagName: 'a',
+        attribs: {
+          ...attribs,
+          target: '_blank',
+          rel: 'noopener noreferrer nofollow ugc'
+        }
+      })
+    }
+  }).trim()
+}
+
+module.exports = { sanitizeTitle, sanitizeBody, sanitizeComment }
+
+
+==================================
+validate.js v.1
+==================================
+
+module.exports = function validateFields(fields) {
+    const errors = []
+    for (const [key, [value, msg]] of Object.entries(fields)) {
+        if (typeof value === 'string' && value.trim() === '') {
+            errors.push(msg)
+        }
+        if (value === undefined || value === null) {
+            errors.push(msg)
+        }
+    }
+    return errors
+}
+
+
+==================================
+.env v.1
+==================================
+
+# Serwer aplikacji
+PORT=5000
+MONGO_URI=mongodb://localhost:27017/cms
+JWT_SECRET=twoj_tajny_klucz_ktory_nie_jest_prosty^%45
+FRONTEND_URL=http://localhost:3000
+
+# SMTP / Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=chrupek999@gmail.com
+SMTP_PASS=ccplvltfxgkhdgrb
+MAIL_FROM="CMS <no-reply@twojadomena.pl>"
+
+# Inne
+APP_NAME=CMS
+
+==================================
+server.js v.1
+==================================
+
+// server.js
+const express = require('express')
+const mongoose = require('mongoose')
+const dotenv = require('dotenv')
+const helmet = require('helmet')
+const cookieParser = require('cookie-parser')
+const cors = require('cors')
+const rateLimit = require('express-rate-limit')
+const path = require('path')
+
+dotenv.config()
+const app = express()
+
+// ZMIANA 1: Usunięto `app.set('trust proxy', 1);` - niepotrzebne w lokalnym środowisku (było dla proxy/CDN na Render)
+
+// Środowisko
+const PORT = process.env.PORT || 5000
+const MONGO_URI = process.env.MONGO_URI
+const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:1234'
+
+// Middleware
+app.use(helmet())
+app.use(express.json())
+app.use(cookieParser())
+
+// ZMIANA 2: Uproszczono ALLOWED_ORIGINS - tylko lokalny frontend
+const ALLOWED_ORIGINS = ['http://localhost:3000']; // Usunięto Render URL i inne, tylko localhost:3000
+
+// ZMIANA 3: Uproszczono CORS - tylko dla lokalnego frontendu
+const corsOptions = {
+  origin: (origin, cb) => {
+    // Zezwalaj na brak origin (np. curl) lub tylko na ALLOWED_ORIGINS
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+// preflight + właściwe żądania
+app.use(cors(corsOptions));
+
+// Rate limit tylko dla /api/auth
+const authLimiter = rateLimit({
+  windowMs: 60 * 1000, // ZMIANA 4: Uproszczono do 1 minuty dla dev (było zależne od NODE_ENV)
+  max: 1000, // ZMIANA 5: Zwiększono limit dla dev (było 100 dla prod)
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Zbyt wiele żądań. Spróbuj ponownie później.' }
+})
+app.use('/api/auth', authLimiter)
+
+// Statyczne pliki (obrazki)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'), {
+  setHeaders: (res, p) => {
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin')
+  }
+}))
+
+// Trasy API
+app.use('/api/auth', require('./routes/authRoutes'))
+app.use('/api/articles', require('./routes/articleRoutes'))
+app.use('/api/comments', require('./routes/commentRoutes'))
+app.use('/api/users', require('./routes/userRoutes'))
+app.use('/api/admin', require('./routes/adminRoutes'))
+
+// 404 – brak trasy
+app.use((req, res) => {
+  res.status(404).json({ message: 'Nie znaleziono endpointu.' })
+})
+
+// Globalny handler błędów (ZA trasami)
+app.use((err, req, res, next) => {
+  // Multer: za duży plik
+  if (err && err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(413).json({ message: 'Za duży plik. Limit 5MB.' })
+  }
+  // Multer / fileFilter: nieprawidłowy typ pliku
+  if (err && err.message && /pliki graficzne|plik[ów]* graficzny|image/i.test(err.message)) {
+    return res.status(400).json({ message: 'Dozwolone są tylko pliki graficzne.' })
+  }
+
+  console.error('Błąd:', err.stack || err)
+  return res.status(500).json({ message: 'Wewnętrzny błąd serwera' })
+})
+
+// Połączenie z MongoDB i start
+mongoose.connect(MONGO_URI, {})
+  .then(() => {
+    console.log('✅ Połączono z MongoDB')
+
+    // 🔍 Log szczegółów połączenia
+    const conn = mongoose.connection
+    console.log(`📦 Baza: ${conn.name}`)
+    console.log(`🌐 Host: ${conn.host}`)
+
+    app.listen(PORT, () => console.log(`🚀 Serwer działa na porcie ${PORT}`))
+  })
+  .catch((err) => {
+    console.error('❌ Błąd połączenia z MongoDB:', err)
+    process.exit(1)
+  })

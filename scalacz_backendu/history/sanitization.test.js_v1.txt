@@ -1,0 +1,173 @@
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const User = require('../../models/User');
+const Article = require('../../models/Article');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Testy Sanitization i Bezpieczeństwa', () => {
+  let authToken;
+  let testUser;
+  let testArticle;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    testUser = await User.create({
+      email: 'security@example.com',
+      password: hashedPassword,
+      username: 'securityuser',
+      role: 'author',
+    });
+
+    // Utwórz testowy artykuł
+    testArticle = await Article.create({
+      title: 'Test Security Article',
+      content: 'Content for security testing',
+      author: testUser._id,
+      images: [],
+    });
+
+    // Login aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'security@example.com',
+      password: 'test123',
+    });
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await Article.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  describe('XSS Injection Tests', () => {
+    it('Powinien OCZYŚCIĆ XSS w tytule artykułu', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', '<script>alert("xss")</script>Test')
+        .field(
+          'content',
+          'Normalna treść artykułu która jest wystarczająco długa.',
+        )
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201); // Powinien zaakceptować po oczyszczeniu
+      expect(response.body.article.title).not.toContain('<script>');
+      expect(response.body.article.title).toContain('Test');
+    });
+
+    it('Powinien OCZYŚCIĆ XSS w komentarzach', async () => {
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({ text: '<img src="x" onerror="alert(1)">Test comment' });
+
+      expect(response.status).toBe(201);
+      expect(response.body.text).toBe('Test comment');
+      expect(response.body.text).not.toContain('onerror');
+      expect(response.body.text).not.toContain('<img');
+      expect(response.body.text).not.toContain('&lt;img');
+    });
+
+    it('Powinien OCZYŚCIĆ XSS w update profilu', async () => {
+      const response = await request(app)
+        .put('/api/users/profile')
+        .set('Cookie', authToken)
+        .send({ username: '<script>alert("xss")</script>Hacker' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.username).not.toContain('<script>');
+      expect(response.body.user.username).toContain('Hacker');
+    });
+  });
+
+  describe('SQL Injection Tests', () => {
+    it('Powinien bezpiecznie obsłużyć SQL injection w wyszukiwaniu', async () => {
+      const response = await request(app)
+        .get('/api/articles?q=test%27; DROP TABLE users;--')
+        .set('Cookie', authToken);
+
+      // Powinno zwrócić puste wyniki, a nie błąd bazy
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('articles');
+      expect(Array.isArray(response.body.articles)).toBe(true);
+    });
+
+    it('Powinien bezpiecznie obsłużyć SQL injection w parametrach', async () => {
+      const maliciousId = "'; DROP TABLE users; --";
+      const response = await request(app)
+        .get(`/api/articles/${maliciousId}`)
+        .set('Cookie', authToken);
+
+      // Powinien zwrócić 400 (Invalid ID) zamiast błędu bazy
+      expect([400, 404]).toContain(response.status);
+    });
+  });
+
+  describe('HTML Injection Tests', () => {
+    it('Powinien OCZYŚCIĆ HTML w polach tekstowych', async () => {
+      const cleanText = 'Normalny tekst <b>pogrubiony</b> ale bezpieczny';
+
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({ text: cleanText });
+
+      // Sprawdź czy HTML jest escapowany (bezpieczne)
+      expect(response.status).toBe(201);
+      expect(response.body.text).toContain('&lt;b&gt;pogrubiony&lt;/b&gt;');
+      expect(response.body.text).not.toContain('<b>');
+      expect(response.body.text).not.toContain('<script>');
+    });
+  });
+
+  describe('Specific Sanitization Behaviors', () => {
+    it('Powinien escapować HTML zamiast usuwać w komentarzach', async () => {
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({ text: 'Text with <b>bold</b> and <script>alert(1)</script>' });
+
+      expect(response.status).toBe(201);
+      expect(response.body.text).toContain('&lt;b&gt;bold&lt;/b&gt;');
+      expect(response.body.text).toContain(
+        '&lt;script&gt;alert(1)&lt;/script&gt;',
+      );
+      expect(response.body.text).not.toContain('<script>');
+    });
+
+    it('Powinien całkowicie usuwać HTML w tytułach', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', 'Title with <script>alert(1)</script> HTML')
+        .field('content', 'Normal content here...')
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201);
+      expect(response.body.article.title).toBe('Title with alert(1) HTML');
+      expect(response.body.article.title).not.toContain('<script>');
+      expect(response.body.article.title).not.toContain('&lt;script&gt;');
+    });
+  });
+
+  it('Powinien escapować HTML w TREŚCI ARTYKUŁÓW', async () => {
+    const response = await request(app)
+      .post('/api/articles')
+      .set('Cookie', authToken)
+      .field('title', 'Normal title')
+      .field('content', 'Text with <b>bold</b> and <script>alert(1)</script>')
+      .attach('images', Buffer.from('test'), 'test.jpg');
+
+    expect(response.status).toBe(201);
+    expect(response.body.article.content).toContain('&lt;b&gt;bold&lt;/b&gt;');
+    expect(response.body.article.content).toContain(
+      '&lt;script&gt;alert(1)&lt;/script&gt;',
+    );
+    expect(response.body.article.content).not.toContain('<script>');
+  });
+});

@@ -11,5 +11,3 @@ Thumbs.db
 # Logs
 **/logs/
 **/*.log
-
-**/scalacz_backendu/

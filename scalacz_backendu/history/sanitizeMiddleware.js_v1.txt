@@ -1,0 +1,39 @@
+const { sanitizeStrict } = require('../utils/sanitize');
+
+const deepSanitize = (req, res, next) => {
+  // Sanityzacja parametrów URL
+  if (req.params) {
+    Object.keys(req.params).forEach((key) => {
+      if (typeof req.params[key] === 'string') {
+        req.params[key] = sanitizeStrict(req.params[key]);
+      }
+    });
+  }
+
+  // Sanityzacja query string
+  if (req.query) {
+    Object.keys(req.query).forEach((key) => {
+      if (typeof req.query[key] === 'string') {
+        req.query[key] = sanitizeStrict(req.query[key]);
+      }
+    });
+  }
+
+  // Sanityzacja body (dla JSON)
+  if (req.body && typeof req.body === 'object') {
+    const sanitizeObject = (obj) => {
+      Object.keys(obj).forEach((key) => {
+        if (typeof obj[key] === 'string') {
+          obj[key] = sanitizeStrict(obj[key]);
+        } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+          sanitizeObject(obj[key]);
+        }
+      });
+    };
+    sanitizeObject(req.body);
+  }
+
+  next();
+};
+
+module.exports = deepSanitize;
