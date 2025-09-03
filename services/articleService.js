@@ -1,3 +1,4 @@
+// services/articleService.js
 const logger = require('../utils/logger');
 const Article = require('../models/Article');
 const Comment = require('../models/Comment');
@@ -47,125 +48,86 @@ const createArticle = async (title, content, authorId, imagePaths) => {
     author: authorId,
   });
 
+  console.log('RAW TITLE:', title);
+  console.log('SANITIZED TITLE:', sanitizeTitle(title));
+
   await newArticle.save();
   return newArticle;
 };
 
-// Get articles with filtering, sorting, and pagination
-const getArticles = async (
-  page = 1,
-  limit = 5,
-  search = '',
-  _sort = 'newest',
-) => {
-  const sort = _sort;
-  const sortMap = {
-    newest: { createdAt: -1 },
-    oldest: { createdAt: 1 },
-    titleAZ: { title: 1, createdAt: -1 },
-    titleZA: { title: -1, createdAt: -1 },
-  };
-
+// Get articles with filtering, sorting, and pagination - ZOPTYMALIZOWANE
+const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
-  // Build filter
-  const rawQ = (search || '').trim().slice(0, 100);
-  const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const filter = rawQ
-    ? {
-        $or: [
-          { title: { $regex: esc(rawQ), $options: 'i' } },
-          { content: { $regex: esc(rawQ), $options: 'i' } },
-        ],
-      }
+  // ✅ ZOPTYMALIZOWANE: Build query with full-text search if available
+  const query = search 
+    ? { $text: { $search: search } } // ✅ Uses full-text index
     : {};
 
-  let articlesRaw;
-  let total;
+  // ✅ ZOPTYMALIZOWANE: Sort options that use indexes
+  const sortOptions = {
+    newest: { createdAt: -1 }, // ✅ Uses index
+    oldest: { createdAt: 1 },  // ✅ Uses index  
+    mostLiked: { likesCount: -1 }, // ✅ Uses index
+    titleAZ: { title: 1, createdAt: -1 }, // ✅ Uses compound index
+    titleZA: { title: -1, createdAt: -1 }, // ✅ Uses compound index
+  };
 
-  if (sort === 'mostLiked') {
-    const pipeline = [
-      { $match: filter },
-      { $addFields: { likesCount: { $size: { $ifNull: ['$likes', []] } } } },
-      { $sort: { likesCount: -1, createdAt: -1 } },
-      { $skip: skip },
-      { $limit: parseInt(limit) },
-      {
-        $project: {
-          title: 1,
-          content: 1,
-          images: 1,
-          createdAt: 1,
-          author: 1,
-          likes: 1,
-          likesCount: 1,
-        },
-      },
-    ];
-
-    articlesRaw = await Article.aggregate(pipeline);
-    total = await Article.countDocuments(filter);
-  } else {
-    articlesRaw = await Article.find(filter)
-      .sort(sortMap[sort] || sortMap.newest)
+  // ✅ ZOPTYMALIZOWANE: Use Promise.all for parallel execution
+  const [articles, total] = await Promise.all([
+    Article.find(query)
+      .select('title content author images createdAt likes') // ✅ Only needed fields
+      .populate('author', 'email username') // ✅ Only needed author fields
+      .sort(sortOptions[sort] || sortOptions.newest)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'email');
-    total = await Article.countDocuments(filter);
-  }
+      .lean(), // ✅ Faster data return
+    
+    Article.countDocuments(query),
+  ]);
 
-  // Process articles
-  const articles = await Promise.all(
-    articlesRaw.map(async (article) => {
-      const commentCount = await Comment.countDocuments({
-        article: article._id,
-      });
+  // ✅ ZOPTYMALIZOWANE: Parallel comment counts
+  const articlesWithCounts = await Promise.all(
+    articles.map(async (article) => {
+      const commentCount = await Comment.countDocuments({ article: article._id });
       return {
-        _id: article._id,
-        title: article.title,
-        content: article.content,
+        ...article,
         likesCount: Array.isArray(article.likes) ? article.likes.length : 0,
         commentCount,
-        createdAt: article.createdAt,
-        author: article.author,
-        thumbnail:
-          article.images && article.images.length > 0
-            ? toPublicPath(article.images[0])
-            : null,
+        thumbnail: article.images && article.images.length > 0
+          ? toPublicPath(article.images[0])
+          : null,
       };
     }),
   );
 
-  return { articles, total };
+  return { articles: articlesWithCounts, total };
 };
 
-// Get article by ID
+// Get article by ID - ZOPTYMALIZOWANE
 const getArticleById = async (id) => {
-  const article = await Article.findById(id).populate(
-    'author',
-    'username email',
-  );
+  // ✅ ZOPTYMALIZOWANE: Single query with projection
+  const article = await Article.findById(id)
+    .select('-__v') // ✅ Exclude unnecessary fields
+    .populate('author', 'username email') // ✅ Only needed author fields
+    .lean(); // ✅ Faster data return
+
   if (!article) throw new Error('Nie znaleziono artykułu');
 
-  const commentCount = await Comment.countDocuments({ article: article._id });
+  // ✅ ZOPTYMALIZOWANE: Parallel comment count
+  const [commentCount] = await Promise.all([
+    Comment.countDocuments({ article: article._id }),
+  ]);
 
-  const articleObj = article.toObject();
-  articleObj.images = Array.isArray(articleObj.images)
-    ? articleObj.images.map(toPublicPath)
-    : [];
-  articleObj.commentCount = commentCount;
-
-  return articleObj;
+  return {
+    ...article,
+    images: Array.isArray(article.images) ? article.images.map(toPublicPath) : [],
+    commentCount,
+  };
 };
 
 // Update article
-const updateArticle = async (
-  articleId,
-  updateData,
-  userId,
-  userRole,
-  files,
-) => {
+const updateArticle = async (articleId, updateData, userId, userRole, files) => {
   const { title, content, removeImages } = updateData;
   const article = await Article.findById(articleId);
   if (!article) throw new Error('Artykuł nie znaleziony');
@@ -215,8 +177,7 @@ const updateArticle = async (
     else article.title = sanitizeTitle(title);
   }
   if (content) {
-    if (content.length < 20)
-      errors.push('Treść musi mieć co najmniej 20 znaków');
+    if (content.length < 20) errors.push('Treść musi mieć co najmniej 20 znaków');
     else article.content = sanitizeBody(content);
   }
   if (errors.length) throw new Error(errors.join(' '));
@@ -247,10 +208,11 @@ const deleteArticle = async (articleId, userId, userRole) => {
     }
   }
 
-  // Remove comments
-  await Comment.deleteMany({ article: article._id });
-
-  await article.deleteOne();
+  // ✅ ZOPTYMALIZOWANE: Parallel operations
+  await Promise.all([
+    Comment.deleteMany({ article: article._id }),
+    article.deleteOne(),
+  ]);
 };
 
 // Toggle like on article

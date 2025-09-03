@@ -10,6 +10,7 @@ const deepSanitize = require('./middleware/sanitizeMiddleware');
 const cspMiddleware = require('./middleware/cspMiddleware');
 const redisClient = require('./utils/redisClient');
 const { cacheMiddleware } = require('./middleware/cacheMiddleware');
+const performanceMiddleware = require('./middleware/performanceMiddleware');
 
 // 🎯 POPRAWIONE: JEDEN import limitersów
 const {
@@ -51,6 +52,7 @@ const cleanupTestDatabase = async () => {
 
 // Middleware
 app.use(helmet());
+app.use(performanceMiddleware);
 app.use(cspMiddleware);
 if (process.env.NODE_ENV !== 'test') {
   app.use(deepSanitize);

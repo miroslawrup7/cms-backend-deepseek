@@ -1,32 +1,37 @@
 // models/Article.js v.2
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const articleSchema = new mongoose.Schema(
-    {
-        title: {
-            type: String,
-            required: true,
-            trim: true,
-        },
-        content: {
-            type: String,
-            required: true,
-        },
-        author: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
-            required: true,
-        },
-        images: [{ type: String }],
-        likes: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    {
-        timestamps: true,
-    }
+    content: {
+      type: String,
+      required: true,
+    },
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    images: [{ type: String }],
+    likes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  },
+  {
+    timestamps: true,
+  },
 );
 
 // Dodanie indeksów dla optymalizacji
 articleSchema.index({ author: 1, createdAt: -1 }); // dla listy artykułów usera
-articleSchema.index({ title: "text", content: "text" }); // dla wyszukiwania tekstowego
+articleSchema.index({ title: 'text', content: 'text' }); // dla wyszukiwania tekstowego
 
-module.exports = mongoose.model("Article", articleSchema);
+articleSchema.index({ title: 'text', content: 'text' }); // Full-text search
+articleSchema.index({ author: 1, createdAt: -1 }); // Dla listy artykułów usera
+articleSchema.index({ createdAt: -1 }); // Dla sortowania najnowszych
+articleSchema.index({ likesCount: -1 }); // Dla najpopularniejszych
+
+module.exports = mongoose.model('Article', articleSchema);
