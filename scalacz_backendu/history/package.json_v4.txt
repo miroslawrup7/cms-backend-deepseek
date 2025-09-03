@@ -1,0 +1,60 @@
+{
+  "name": "cms-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "dev": "node server.js",
+    "test": "jest --config jest.config.js --verbose",
+    "test:watch": "jest --config jest.config.js --watch",
+    "test:coverage": "jest --config jest.config.js --coverage",
+    "test:unit": "jest --testPathIgnorePatterns=\"integration\"",
+    "test:integration": "jest --testPathPatterns=\"integration\" --verbose",
+    "test:auth": "jest __tests__/integration/auth.test.js --verbose",
+    "test:articles": "jest __tests__/integration/articles.test.js --verbose",
+    "test:comments": "jest __tests__/integration/comments.test.js --verbose",
+    "test:users": "jest __tests__/integration/users.test.js --verbose",
+    "test:admin": "jest __tests__/integration/admin.test.js --verbose",
+    "test:rateLimit": "jest __tests__/integration/rateLimit.test.js --verbose --testTimeout=30000",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "check-style": "npm run lint && npx prettier --check ."
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.0.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.17.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.5",
+    "redis": "^5.8.2",
+    "sanitize-html": "^2.17.0",
+    "winston": "^3.17.0"
+  },
+  "devDependencies": {
+    "@types/redis": "^4.0.10",
+    "dotenv": "^17.2.1",
+    "eslint": "^9.34.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "globals": "^16.3.0",
+    "jest": "^30.1.1",
+    "mongodb-memory-server": "^10.2.0",
+    "nodemon": "^3.1.10",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
+  }
+}

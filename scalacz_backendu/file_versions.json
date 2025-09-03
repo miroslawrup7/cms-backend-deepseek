@@ -724,28 +724,28 @@
     "hash": "1fc52785f96d1645de1e4bafa0529654"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\Article.js": {
-    "version": 1,
-    "hash": "8bc32eb46af364a6830079c16f4162e3"
+    "version": 2,
+    "hash": "6a4eb88caf1c3f58ce45742409b57941"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\Comment.js": {
-    "version": 1,
-    "hash": "629a24b7ed26f0663863a73676b822d4"
+    "version": 2,
+    "hash": "9ddeb1382c699710c3127f752244054f"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\PendingUser.js": {
     "version": 1,
     "hash": "ed54fc8424053bc9d7c483627dec5a19"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\models\\User.js": {
-    "version": 1,
-    "hash": "a24723d3527cb783ccb1bdf4adf2e7e0"
+    "version": 2,
+    "hash": "053595563a1f51df0db37811d3b0416c"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\adminRoutes.js": {
     "version": 1,
     "hash": "759751ed3b7063bddf26846fe3603d17"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\articleRoutes.js": {
-    "version": 1,
-    "hash": "e6ecc4548ce42a1325ffa2fd6d277716"
+    "version": 2,
+    "hash": "9aa2e48d402894d61006cf24ba7ae17e"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\routes\\authRoutes.js": {
     "version": 1,
@@ -760,16 +760,16 @@
     "hash": "968472866e82887c199539ff9c1bfefd"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\articleService.js": {
-    "version": 2,
-    "hash": "12b888966404924768cb34204484983f"
+    "version": 3,
+    "hash": "c32be8db39fbc05fbef8b88bff627edb"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\authService.js": {
     "version": 1,
     "hash": "7f2341f98c5715516449caade289d7e7"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\commentService.js": {
-    "version": 2,
-    "hash": "fa618f06191e9ed96a52daf2434bcd98"
+    "version": 3,
+    "hash": "eef1b0da652604b46f83043da479e524"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\services\\userService.js": {
     "version": 1,
@@ -908,8 +908,8 @@
     "hash": "0481bfcbf4dde8f155c1ea10a2b9178a"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\advancedValidate.js": {
-    "version": 1,
-    "hash": "9132091acffdc94b0467ef60900fc3d8"
+    "version": 2,
+    "hash": "0cb0a1b70f087a85791c358720815894"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\emailTemplates.js": {
     "version": 1,
@@ -940,36 +940,36 @@
     "hash": "214c779a60fb09eb1b8e5f969aa8a44f"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.env.test": {
-    "version": 1,
-    "hash": "7cddabe3a4bb5c75d8409adc11715c50"
+    "version": 2,
+    "hash": "676913a9530ae0c5d106af4ee36fe234"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.gitattributes": {
     "version": 1,
     "hash": "abc89807bf0b66cec65c1870ca483ddd"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.gitignore": {
-    "version": 1,
-    "hash": "2ebb477b4208787ee94335acfe99b91e"
+    "version": 2,
+    "hash": "c32dedaf3d578178b4dbf6a74badda9a"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\.prettierrc": {
     "version": 1,
     "hash": "a33c9447ad68be617ab79d55acec9687"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\eslint.config.js": {
-    "version": 1,
-    "hash": "15b409a1fb0fa368a15d26477d020bae"
+    "version": 2,
+    "hash": "0071064958120da14235518009444c50"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\jest.config.js": {
     "version": 3,
     "hash": "15db7218848230dcbe2ad1e07ebe1f46"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\package.json": {
-    "version": 3,
-    "hash": "c2d7ce15010072d57289d2ba0180b930"
+    "version": 4,
+    "hash": "23b0ce77455141ad2ab464c4e39e0f0c"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\server.js": {
-    "version": 5,
-    "hash": "e8229bcee8d99508d10fef4179ba3010"
+    "version": 6,
+    "hash": "e9d846b79482fcbcb6f90cea39569aa9"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\admin.test.js": {
     "version": 2,
@@ -1032,8 +1032,8 @@
     "hash": "4683f083ca028a7327e2f7d06b266566"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\sanitization.test.js": {
-    "version": 2,
-    "hash": "f8da9d1e66d7c7290de09ae3e97c36b1"
+    "version": 3,
+    "hash": "118702f6e991493414b87d61024b8a0a"
   },
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\utils\\sanitize.test.js": {
     "version": 2,
@@ -1222,5 +1222,109 @@
   "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749401629-433218701.jpg": {
     "version": 1,
     "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\cache.test.js": {
+    "version": 1,
+    "hash": "dfc10eba206515d9c5694444868c376b"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\csp.test.js": {
+    "version": 1,
+    "hash": "6365b4b5fef5315bf3e56a1f4609f778"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\__tests__\\integration\\performance.test.js": {
+    "version": 1,
+    "hash": "411c980b0ee44c7cdc2d12743cfd3430"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\cacheMiddleware.js": {
+    "version": 1,
+    "hash": "7381d55682dfb9405b98532d0610578c"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\cspMiddleware.js": {
+    "version": 1,
+    "hash": "5aa71eff9565e99f94b14d8844b6ddd9"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\middleware\\performanceMiddleware.js": {
+    "version": 1,
+    "hash": "45b2664a1ee1153d0ac7d090fcee5653"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749668873-273283291.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749669055-329166563.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756749669083-769996504.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751265309-698354318.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751265493-994886699.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751265523-985679947.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751529000-357944819.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751529185-646635373.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756751529216-246750683.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752724739-505985337.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752724922-289345804.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752724949-104778983.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752753654-358592865.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752754940-59077898.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752755119-712420293.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\uploads\\1756752755148-159481951.jpg": {
+    "version": 1,
+    "hash": "098f6bcd4621d373cade4e832627b4f6"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\queryLogger.js": {
+    "version": 1,
+    "hash": "5729c0fc2860b5b4a12d69629ef3c2f7"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\utils\\redisClient.js": {
+    "version": 1,
+    "hash": "ec6ba7bc50cccf5ff5816a57f6493847"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\scripts\\createIndexes.js": {
+    "version": 1,
+    "hash": "79562edf1846ecd0f59327e41c6c8492"
+  },
+  "D:\\Programowanie\\projekty inne\\CMS DeepSeek\\cms-backend DeepSeek\\Plan Backend.txt": {
+    "version": 1,
+    "hash": "0e6396b85e1731c2448c6a0adeacf1ae"
   }
 }
