@@ -5,9 +5,9 @@
   "main": "server.js",
   "scripts": {
     "redis:up": "node -e \"const { exec } = require('child_process'); exec('docker-compose down', () => { exec('docker-compose up -d redis') })\"",
-    "redis:down": "docker-compose down", 
-    "dev": "concurrently \"npm run redis:up\" \"nodemon server.js\"",
-    "start": "concurrently \"npm run redis:up\" \"node server.js\"",
+    "redis:down": "docker-compose down",
+    "dev": "npm run redis:up && nodemon server.js",
+    "start": "npm run redis:up && node server.js",
     "stop": "npm run redis:down",
     "clean": "docker-compose down -v",
     "docker:status": "docker ps && docker-compose ps",
