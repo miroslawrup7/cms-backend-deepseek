@@ -6,17 +6,17 @@ const userSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: true,
+    unique: true, // ✅ TWORZY INDEX - wystarczy
     trim: true,
   },
   email: {
     type: String,
     required: true,
-    unique: true,
+    unique: true, // ✅ TWORZY INDEX - wystarczy
     lowercase: true,
     trim: true,
     match: [/^[^\s@]+@[^\s@]+\.[^\s@]+$/, 'Nieprawidłowy format adresu e-mail'],
-    index: true, // ✅ Dodany indeks
+    // ❌ USUŃ: index: true - to duplikuje unique: true
   },
   password: {
     type: String,
@@ -47,8 +47,7 @@ userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
-// userSchema.index({ email: 1 }, { unique: true }); // Już masz
-// userSchema.index({ username: 1 }, { unique: true }); // Już masz
-// userSchema.index({ createdAt: -1 }); // Dla listy użytkowników
+// ✅ ZOSTAW tylko ten indeks (jeśli potrzebujesz)
+userSchema.index({ createdAt: -1 }); // Dla listy użytkowników
 
 module.exports = mongoose.model('User', userSchema);

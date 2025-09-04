@@ -50,6 +50,10 @@ const cleanupTestDatabase = async () => {
   }
 };
 
+if (process.env.NODE_ENV === 'development') {
+  require('./utils/queryLogger');
+}
+
 // Middleware
 app.use(helmet());
 app.use(performanceMiddleware);
@@ -148,9 +152,9 @@ app.use((err, req, res, _next) => {
 const initRedis = async () => {
   try {
     await redisClient.connect();
-    console.log('✅ Redis connected');
+    logger.info('✅ Redis connected');
   } catch (error) {
-    console.log('❌ Redis not available, continuing without cache');
+    logger.warn('❌ Redis not available, continuing without cache');
   }
 };
 

@@ -25,13 +25,9 @@ const articleSchema = new mongoose.Schema(
   },
 );
 
-// Dodanie indeksów dla optymalizacji
+// ✅ POPRAWIONE: Usunięto duplikaty - ZOSTAW TYLKO JEDNĄ DEFINICJĘ KAŻDEGO INDEKSU
 articleSchema.index({ author: 1, createdAt: -1 }); // dla listy artykułów usera
 articleSchema.index({ title: 'text', content: 'text' }); // dla wyszukiwania tekstowego
-
-// articleSchema.index({ title: 'text', content: 'text' }); // Full-text search
-// articleSchema.index({ author: 1, createdAt: -1 }); // Dla listy artykułów usera
-// articleSchema.index({ createdAt: -1 }); // Dla sortowania najnowszych
-// articleSchema.index({ likesCount: -1 }); // Dla najpopularniejszych
+articleSchema.index({ createdAt: -1 }); // Dla sortowania najnowszych
 
 module.exports = mongoose.model('Article', articleSchema);

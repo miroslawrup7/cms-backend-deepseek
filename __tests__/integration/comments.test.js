@@ -69,9 +69,10 @@ describe('Integracja: Endpointy Komentarzy', () => {
         .set('Cookie', authToken);
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(1);
-      expect(response.body[0]).toHaveProperty(
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(1);
+      expect(response.body.comments[0]).toHaveProperty(
         'text',
         'Initial test comment for testing purposes',
       );
@@ -85,8 +86,9 @@ describe('Integracja: Endpointy Komentarzy', () => {
         .set('Cookie', authToken);
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(0);
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(0);
     });
 
     it('Powinien zwrócić pustą listę dla nieistniejącego artykułu', async () => {
@@ -97,8 +99,9 @@ describe('Integracja: Endpointy Komentarzy', () => {
         .set('Cookie', authToken);
 
       expect(response.status).toBe(200);
-      expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(0); // Pusta tablica zamiast błędu 404
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(0);
     });
   });
 

@@ -6,7 +6,11 @@ const addComment = async (req, res) => {
   try {
     const articleId = req.params.id;
     const rawText = req.body?.text ?? '';
-    const comment = await commentService.addComment(articleId, req.user._id, rawText);
+    const comment = await commentService.addComment(
+      articleId,
+      req.user._id,
+      rawText,
+    );
     return res.status(201).json(comment);
   } catch (error) {
     logger.error('Błąd podczas dodawania komentarza:', error);
@@ -28,8 +32,11 @@ const addComment = async (req, res) => {
 const getComments = async (req, res) => {
   try {
     const articleId = req.params.id;
-    const comments = await commentService.getComments(articleId);
-    return res.json(comments);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const result = await commentService.getComments(articleId, page, limit);
+    return res.json(result);
   } catch (error) {
     logger.error('Błąd podczas pobierania komentarzy:', error);
     return res.status(500).json({ message: 'Błąd serwera' });

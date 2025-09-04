@@ -41,12 +41,26 @@ const addComment = async (articleId, authorId, rawText) => {
 };
 
 // Get comments for article
-const getComments = async (articleId) => {
-  const comments = await Comment.find({ article: articleId })
-    .populate('author', 'username')
-    .sort({ createdAt: -1 });
+const getComments = async (articleId, page = 1, limit = 20) => {
+  const skip = (page - 1) * limit;
 
-  return comments;
+  const [comments, total] = await Promise.all([
+    Comment.find({ article: articleId })
+      .populate('author', 'username')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Comment.countDocuments({ article: articleId }),
+  ]);
+
+  return {
+    comments,
+    total,
+    page,
+    limit,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 // Update comment

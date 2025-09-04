@@ -27,7 +27,11 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
-    "check-style": "npm run lint && npx prettier --check ."
+    "check-style": "npm run lint && npx prettier --check .",
+    "create-indexes": "node scripts/createIndexes.js",
+    "create-indexes:prod": "NODE_ENV=production node scripts/createIndexes.js",
+    "test:performance": "node scripts/performanceTest.js",
+    "test:performance:prod": "NODE_ENV=production node scripts/performanceTest.js"
   },
   "keywords": [],
   "author": "",
@@ -52,6 +56,7 @@
     "winston": "^3.17.0"
   },
   "devDependencies": {
+    "@faker-js/faker": "^8.4.1",
     "@types/redis": "^4.0.10",
     "concurrently": "^9.2.1",
     "dotenv": "^17.2.1",

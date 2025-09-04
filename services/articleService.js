@@ -56,18 +56,23 @@ const createArticle = async (title, content, authorId, imagePaths) => {
 };
 
 // Get articles with filtering, sorting, and pagination - ZOPTYMALIZOWANE
-const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') => {
+const getArticles = async (
+  page = 1,
+  limit = 5,
+  search = '',
+  sort = 'newest',
+) => {
   const skip = (parseInt(page) - 1) * parseInt(limit);
 
   // ✅ ZOPTYMALIZOWANE: Build query with full-text search if available
-  const query = search 
+  const query = search
     ? { $text: { $search: search } } // ✅ Uses full-text index
     : {};
 
   // ✅ ZOPTYMALIZOWANE: Sort options that use indexes
   const sortOptions = {
     newest: { createdAt: -1 }, // ✅ Uses index
-    oldest: { createdAt: 1 },  // ✅ Uses index  
+    oldest: { createdAt: 1 }, // ✅ Uses index
     mostLiked: { likesCount: -1 }, // ✅ Uses index
     titleAZ: { title: 1, createdAt: -1 }, // ✅ Uses compound index
     titleZA: { title: -1, createdAt: -1 }, // ✅ Uses compound index
@@ -82,21 +87,24 @@ const getArticles = async (page = 1, limit = 5, search = '', sort = 'newest') =>
       .skip(skip)
       .limit(parseInt(limit))
       .lean(), // ✅ Faster data return
-    
+
     Article.countDocuments(query),
   ]);
 
   // ✅ ZOPTYMALIZOWANE: Parallel comment counts
   const articlesWithCounts = await Promise.all(
     articles.map(async (article) => {
-      const commentCount = await Comment.countDocuments({ article: article._id });
+      const commentCount = await Comment.countDocuments({
+        article: article._id,
+      });
       return {
         ...article,
         likesCount: Array.isArray(article.likes) ? article.likes.length : 0,
         commentCount,
-        thumbnail: article.images && article.images.length > 0
-          ? toPublicPath(article.images[0])
-          : null,
+        thumbnail:
+          article.images && article.images.length > 0
+            ? toPublicPath(article.images[0])
+            : null,
       };
     }),
   );
@@ -121,13 +129,21 @@ const getArticleById = async (id) => {
 
   return {
     ...article,
-    images: Array.isArray(article.images) ? article.images.map(toPublicPath) : [],
+    images: Array.isArray(article.images)
+      ? article.images.map(toPublicPath)
+      : [],
     commentCount,
   };
 };
 
 // Update article
-const updateArticle = async (articleId, updateData, userId, userRole, files) => {
+const updateArticle = async (
+  articleId,
+  updateData,
+  userId,
+  userRole,
+  files,
+) => {
   const { title, content, removeImages } = updateData;
   const article = await Article.findById(articleId);
   if (!article) throw new Error('Artykuł nie znaleziony');
@@ -177,7 +193,8 @@ const updateArticle = async (articleId, updateData, userId, userRole, files) => 
     else article.title = sanitizeTitle(title);
   }
   if (content) {
-    if (content.length < 20) errors.push('Treść musi mieć co najmniej 20 znaków');
+    if (content.length < 20)
+      errors.push('Treść musi mieć co najmniej 20 znaków');
     else article.content = sanitizeBody(content);
   }
   if (errors.length) throw new Error(errors.join(' '));

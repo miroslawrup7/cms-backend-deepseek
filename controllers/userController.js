@@ -37,18 +37,25 @@ const changePassword = async (req, res) => {
     return res.json({ message: 'Hasło zostało zmienione.' });
   } catch (error) {
     logger.error('Błąd changePassword:', error);
-    if (error.message.includes('Stare hasło') || error.message.includes('Nowe hasło')) {
+    if (
+      error.message.includes('Stare hasło') ||
+      error.message.includes('Nowe hasło')
+    ) {
       return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
   }
 };
 
-// GET /api/users (admin)
+// GET /api/users (admin) - ✅ ZMODYFIKOWANE Z PAGINACJĄ
 const listUsers = async (req, res) => {
   try {
-    const users = await userService.listUsers();
-    return res.json(users);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const result = await userService.listUsers(page, limit, search);
+    return res.json(result);
   } catch (error) {
     logger.error('Błąd listUsers:', error);
     return res.status(500).json({ message: 'Błąd serwera' });
@@ -64,7 +71,10 @@ const changeRole = async (req, res) => {
     return res.json({ message: 'Rola zaktualizowana.', user });
   } catch (error) {
     logger.error('Błąd changeRole:', error);
-    if (error.message.includes('Rola') || error.message.includes('Nieprawidłowa')) {
+    if (
+      error.message.includes('Rola') ||
+      error.message.includes('Nieprawidłowa')
+    ) {
       return res.status(400).json({ message: error.message });
     }
     return res.status(500).json({ message: 'Błąd serwera' });
