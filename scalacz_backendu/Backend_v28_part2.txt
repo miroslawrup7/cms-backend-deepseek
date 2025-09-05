@@ -1,0 +1,2000 @@
+__tests__\services\articleService.getArticles.test.js v.1
+==================================
+
+// __tests__/services/articleService.getArticles.test.js
+const articleService = require('../../services/articleService');
+const Article = require('../../models/Article');
+const Comment = require('../../models/Comment');
+
+jest.mock('../../models/Article');
+jest.mock('../../models/Comment');
+
+describe('Serwis: articleService - funkcja getArticles', () => {
+  const mockArticlesData = [
+    { 
+      _id: 'article1', 
+      title: 'Test Article 1', 
+      author: { email: 'user1@test.com' }, 
+      content: 'Content 1', 
+      images: [], 
+      likes: [],
+      createdAt: new Date('2023-01-01'),
+    },
+    { 
+      _id: 'article2', 
+      title: 'Test Article 2', 
+      author: { email: 'user2@test.com' }, 
+      content: 'Content 2', 
+      images: [], 
+      likes: ['user1'],
+      createdAt: new Date('2023-01-02'),
+    },
+  ];
+
+  const mockCommentCounts = { article1: 3, article2: 5 };
+
+  // Helper function to create a chainable mock
+  const createChainableMock = (finalValue) => {
+    const mock = jest.fn().mockReturnThis();
+    mock.sort = jest.fn().mockReturnThis();
+    mock.skip = jest.fn().mockReturnThis();
+    mock.limit = jest.fn().mockReturnThis();
+    mock.populate = jest.fn().mockResolvedValue(finalValue);
+    return mock;
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+        
+    // Mockujemy Comment.countDocuments dla każdego artykułu
+    Comment.countDocuments.mockImplementation((query) => {
+      const articleId = query.article.toString();
+      return Promise.resolve(mockCommentCounts[articleId] || 0);
+    });
+
+    // Resetujemy wszystkie mocks Article
+    Article.countDocuments.mockReset();
+    Article.find.mockReset();
+    Article.aggregate.mockReset();
+  });
+
+  it('Powinien zwrócić listę artykułów z paginacją (sort: newest)', async () => {
+    // ARRANGE
+    const page = 1, limit = 2, search = '', sort = 'newest';
+    const totalCount = 2;
+
+    // Mock standardowego find z łańcuchem metod
+    Article.countDocuments.mockResolvedValue(totalCount);
+    Article.find.mockImplementation(() => createChainableMock(mockArticlesData));
+
+    // ACT
+    const result = await articleService.getArticles(page, limit, search, sort);
+
+    // ASSERT
+    expect(Article.countDocuments).toHaveBeenCalled();
+    expect(Article.find).toHaveBeenCalled();
+    expect(result).toEqual({
+      articles: [
+        { 
+          _id: 'article1', 
+          title: 'Test Article 1', 
+          content: 'Content 1',
+          likesCount: 0,
+          commentCount: 3,
+          author: { email: 'user1@test.com' },
+          thumbnail: null,
+          createdAt: new Date('2023-01-01'),
+        },
+        { 
+          _id: 'article2', 
+          title: 'Test Article 2', 
+          content: 'Content 2',
+          likesCount: 1,
+          commentCount: 5,
+          author: { email: 'user2@test.com' },
+          thumbnail: null,
+          createdAt: new Date('2023-01-02'),
+        },
+      ],
+      total: totalCount,
+    });
+  });
+
+  it('Powinien zwrócić listę artykułów (sort: mostLiked - agregacja)', async () => {
+    // ARRANGE
+    const page = 1, limit = 2, search = '', sort = 'mostLiked';
+    const totalCount = 2;
+
+    // Mock agregacji MongoDB - ZWRACA TABLICĘ
+    const mockAggregateResult = [
+      { 
+        _id: 'article1', 
+        title: 'Test Article 1', 
+        content: 'Content 1',
+        author: { email: 'user1@test.com' },
+        images: [],
+        likes: [],
+        likesCount: 0,
+        createdAt: new Date('2023-01-01'),
+      },
+      { 
+        _id: 'article2', 
+        title: 'Test Article 2', 
+        content: 'Content 2', 
+        author: { email: 'user2@test.com' },
+        images: [],
+        likes: ['user1'],
+        likesCount: 1,
+        createdAt: new Date('2023-01-02'),
+      },
+    ];
+        
+    // POPRAWNY MOCK: aggregate() zwraca obiekt z metodą exec()
+    Article.aggregate.mockResolvedValue(mockAggregateResult);
+    Article.countDocuments.mockResolvedValue(totalCount);
+
+    // ACT
+    const result = await articleService.getArticles(page, limit, search, sort);
+
+    // ASSERT
+    expect(Article.aggregate).toHaveBeenCalled();
+    expect(result.total).toBe(totalCount);
+    expect(Array.isArray(result.articles)).toBe(true);
+    expect(result.articles).toHaveLength(2);
+    expect(result.articles[0]).toHaveProperty('commentCount');
+    expect(result.articles[0]).toHaveProperty('likesCount');
+    expect(result.articles[0].likesCount).toBe(0);
+  });
+
+  it('Powinien przefiltrować artykuły wyszukiwaniem (search)', async () => {
+    // ARRANGE
+    const page = 1, limit = 2, search = 'Test', sort = 'newest';
+    const filteredArticles = [mockArticlesData[0]];
+    const totalCount = 1;
+
+    Article.countDocuments.mockResolvedValue(totalCount);
+    Article.find.mockImplementation(() => createChainableMock(filteredArticles));
+
+    // ACT
+    const result = await articleService.getArticles(page, limit, search, sort);
+
+    // ASSERT
+    expect(Article.find).toHaveBeenCalledWith({
+      $or: [
+        { title: { $regex: 'Test', $options: 'i' } },
+        { content: { $regex: 'Test', $options: 'i' } },
+      ],
+    });
+    expect(result.total).toBe(totalCount);
+    expect(result.articles).toHaveLength(1);
+  });
+
+  it('Powinien obsłużyć pustą listę artykułów', async () => {
+    // ARRANGE
+    const page = 1, limit = 2, search = '', sort = 'newest';
+    const totalCount = 0;
+
+    Article.countDocuments.mockResolvedValue(totalCount);
+    Article.find.mockImplementation(() => createChainableMock([]));
+
+    // ACT
+    const result = await articleService.getArticles(page, limit, search, sort);
+
+    // ASSERT
+    expect(result.articles).toEqual([]);
+    expect(result.total).toBe(0);
+  });
+});
+
+==================================
+__tests__\services\articleService.toggleLikeArticle.test.js v.1
+==================================
+
+// __tests__/services/articleService.toggleLikeArticle.test.js
+const articleService = require('../../services/articleService');
+const Article = require('../../models/Article');
+
+jest.mock('../../models/Article');
+
+describe('Serwis: articleService - funkcja toggleLikeArticle', () => {
+  const mockArticleId = '507f1f77bcf86cd799439022'; // ObjectId artykułu
+  const mockUserId = '507f1f77bcf86cd799439011';    // ObjectId użytkownika
+  const mockAuthorId = '507f1f77bcf86cd799439033';  // ObjectId autora (inny niż userId)
+
+  let mockArticleInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+        
+    // 1. Tworzymy podstawową instancję artykułu
+    mockArticleInstance = {
+      _id: mockArticleId,
+      author: mockAuthorId,
+      likes: [], // Początkowo pusta tablica lików
+      save: jest.fn().mockImplementation(function() { 
+        // Symulujemy, że save zwraca "zapisany" obiekt (this)
+        return Promise.resolve(this);
+      }),
+    };
+
+    // 2. --- KLUCZOWA ZMIANA ---
+    // Symulujemy, że `likes` jest tablicą Mongoose z metodą `pull`
+    mockArticleInstance.likes = []; // Resetujemy tablicę
+    // Dodajemy metodę `pull` do tej tablicy
+    mockArticleInstance.likes.pull = jest.fn((userIdToRemove) => {
+      // Implementacja pull: usuwa userId z tablicy likes
+      const index = mockArticleInstance.likes.indexOf(userIdToRemove);
+      if (index > -1) {
+        mockArticleInstance.likes.splice(index, 1);
+      }
+    });
+    // --- KONIEC ZMIANY ---
+
+    // Mockujemy Article.findById aby zwracał naszą instancję
+    Article.findById.mockResolvedValue(mockArticleInstance);
+  });
+
+  it('Powinien dodać like, jeśli użytkownik jeszcze nie polubił artykułu', async () => {
+    // ARRANGE
+    // Początkowy stan: likes = [] (użytkownik nie polubił)
+    mockArticleInstance.likes = [];
+
+    // ACT
+    const result = await articleService.toggleLikeArticle(mockArticleId, mockUserId);
+
+    // ASSERT
+    // 1. Sprawdzamy, czy znaleziono artykuł
+    expect(Article.findById).toHaveBeenCalledWith(mockArticleId);
+    // 2. Sprawdzamy, czy save został wywołany
+    expect(mockArticleInstance.save).toHaveBeenCalled();
+    // 3. Sprawdzamy, czy like został dodany do tablicy (za pomocą push)
+    expect(mockArticleInstance.likes).toContain(mockUserId);
+    // 4. Sprawdzamy, czy wynik wskazuje na dodanie like i poprawną liczbę
+    expect(result).toEqual({
+      liked: true,
+      totalLikes: 1, // Dodano 1 like
+    });
+  });
+
+  it('Powinien usunąć like, jeśli użytkownik już polubił artykuł', async () => {
+    // ARRANGE
+    // Początkowy stan: użytkownik już polubił artykuł
+    // NIE NADPISUJEMY tablicy, tylko MODYFIKUJEMY istniejącą
+    mockArticleInstance.likes.push(mockUserId); // <- Dodajemy userId do istniejącej tablicy
+
+    // ACT
+    const result = await articleService.toggleLikeArticle(mockArticleId, mockUserId);
+
+    // ASSERT
+    expect(Article.findById).toHaveBeenCalledWith(mockArticleId);
+    expect(mockArticleInstance.save).toHaveBeenCalled();
+    // Like powinien zostać usunięty z tablicy (za pomocą pull)
+    expect(mockArticleInstance.likes).not.toContain(mockUserId);
+    // Sprawdzamy, czy metoda pull została wywołana z prawidłowym argumentem
+    expect(mockArticleInstance.likes.pull).toHaveBeenCalledWith(mockUserId);
+    expect(result).toEqual({
+      liked: false,
+      totalLikes: 0, // Usunięto 1 like
+    });
+  });
+
+  it('Powinien rzucić błąd, jeśli artykuł nie istnieje', async () => {
+    // ARRANGE
+    Article.findById.mockResolvedValue(null); // Artykuł nie znaleziony
+
+    // ACT & ASSERT
+    await expect(articleService.toggleLikeArticle(mockArticleId, mockUserId))
+      .rejects
+      .toThrow('Artykuł nie znaleziony');
+  });
+
+  it('Powinien rzucić błąd, jeśli autor próbuje polubić własny artykuł', async () => {
+    // ARRANGE
+    // Symulujemy, że autor próbuje polubić własny artykuł
+    mockArticleInstance.author = mockUserId; // Autor == userId
+
+    // ACT & ASSERT
+    await expect(articleService.toggleLikeArticle(mockArticleId, mockUserId))
+      .rejects
+      .toThrow('Autor nie może polubić własnego artykułu');
+        
+    // Save nie powinien zostać wywołany
+    expect(mockArticleInstance.save).not.toHaveBeenCalled();
+  });
+});
+
+==================================
+__tests__\services\authService.register.pending.test.js v.1
+==================================
+
+// __tests__/services/authService.registerPending.test.js
+const authService = require('../../services/authService');
+const PendingUser = require('../../models/PendingUser');
+const User = require('../../models/User');
+
+// Mockujemy modele Mongoose
+jest.mock('../../models/PendingUser');
+jest.mock('../../models/User');
+
+describe('Serwis: authService - funkcja registerPending', () => {
+  // Dane testowe
+  const mockUserData = {
+    username: 'testuser',
+    email: 'test@example.com',
+    password: 'testpass123',
+    role: 'user',
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks(); // Czyścimy mocki przed każdym testem
+  });
+
+  it('Powinien pomyślnie zarejestrować użytkownika oczekującego', async () => {
+    // ARRANGE
+    // 1. Mockujemy, że NIE ma użytkownika w żadnej z kolekcji
+    User.findOne.mockResolvedValue(null);
+    PendingUser.findOne.mockResolvedValue(null);
+    // 2. Mockujemy metodę `save` na nowej instancji PendingUser
+    const mockSave = jest.fn().mockResolvedValue(true);
+    PendingUser.mockImplementation(() => ({
+      save: mockSave,
+    }));
+
+    // ACT
+    // Wywołujemy funkcję - nie powinna rzucić błędem
+    await expect(authService.registerPending(
+      mockUserData.username,
+      mockUserData.email,
+      mockUserData.password,
+      mockUserData.role,
+    )).resolves.not.toThrow(); // Sprawdzamy, że Promise się resolves (nie rejectuje)
+
+    // ASSERT
+    // Sprawdzamy, czy findOne był wywołany z poprawnym emailem
+    expect(PendingUser.findOne).toHaveBeenCalledWith({ email: mockUserData.email });
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockUserData.email });
+    // Sprawdzamy, czy konstruktor PendingUser został wywołany z prawidłowymi danymi
+    expect(PendingUser).toHaveBeenCalledWith({
+      username: mockUserData.username,
+      email: mockUserData.email,
+      password: mockUserData.password, // jeszcze nie zahashowane!
+      role: mockUserData.role,
+    });
+    // Sprawdzamy, czy save został wywołany na nowym obiekcie
+    expect(mockSave).toHaveBeenCalled();
+  });
+
+  it('Powinien rzucić błąd jeśli użytkownik (Pending) już istnieje', async () => {
+    // ARRANGE
+    // Symulujemy, że użytkownik OCZEKUJĄCY już istnieje
+    PendingUser.findOne.mockResolvedValue({ email: mockUserData.email });
+
+    // ACT & ASSERT
+    // Spodziewamy się, że funkcja rzuci konkretnym błędem
+    await expect(authService.registerPending(
+      mockUserData.username,
+      mockUserData.email,
+      mockUserData.password,
+      mockUserData.role,
+    )).rejects.toThrow('Email jest już zajęty.');
+    
+    // Optional: Sprawdzamy, czy findOne dla User NIE został wywołany (optymalizacja)
+    // expect(User.findOne).not.toHaveBeenCalled();
+  });
+
+  it('Powinien rzucić błąd jeśli użytkownik (User) już istnieje', async () => {
+    // ARRANGE
+    // Symulujemy, że użytkownik ZATWIERDZONY już istnieje
+    PendingUser.findOne.mockResolvedValue(null);
+    User.findOne.mockResolvedValue({ email: mockUserData.email });
+
+    // ACT & ASSERT
+    await expect(authService.registerPending(
+      mockUserData.username,
+      mockUserData.email,
+      mockUserData.password,
+      mockUserData.role,
+    )).rejects.toThrow('Email jest już zajęty.');
+  });
+
+  // Możesz też dodać test dla walidacji (np. brak username)
+  it('Powinien rzucić błąd walidacji jeśli brakuje wymaganego pola', async () => {
+    // ACT & ASSERT - pomijamy username
+    await expect(authService.registerPending(
+      '', // puste username
+      mockUserData.email,
+      mockUserData.password,
+      mockUserData.role,
+    )).rejects.toThrow('Nazwa użytkownika jest wymagana.');
+  });
+});
+
+==================================
+__tests__\services\authService.test.js v.1
+==================================
+
+// __tests__/services/authService.test.js
+const authService = require('../../services/authService');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+jest.mock('../../models/User');
+jest.mock('bcryptjs');
+
+describe('Serwis: authService - funkcja login', () => {
+  const mockEmail = 'test@example.com';
+  const mockPassword = 'haslo123';
+  const mockWrongPassword = 'zlehaslo';
+  const mockUserId = '507f1f77bcf86cd799439011';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('Powinien rzucić błąd "Nieprawidłowy email lub hasło" jeśli użytkownik nie istnieje', async () => {
+    User.findOne.mockResolvedValue(null);
+    
+    await expect(authService.login(mockEmail, mockPassword))
+      .rejects
+      .toThrow('Nieprawidłowy email lub hasło.');
+    
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail.toLowerCase() });
+  });
+
+  it('Powinien rzucić błąd "Nieprawidłowy email lub hasło" jeśli hasło jest niepoprawne', async () => {
+    const mockUser = {
+      _id: mockUserId,
+      email: mockEmail,
+      password: 'zahashowane_haslo_z_bazy',
+    };
+    User.findOne.mockResolvedValue(mockUser);
+    bcrypt.compare.mockResolvedValue(false);
+
+    await expect(authService.login(mockEmail, mockWrongPassword))
+      .rejects
+      .toThrow('Nieprawidłowy email lub hasło.');
+
+    expect(bcrypt.compare).toHaveBeenCalledWith(mockWrongPassword, mockUser.password);
+  });
+
+  it('Powinien zwrócić token JWT gdy email i hasło są poprawne', async () => {
+    const mockUser = {
+      _id: mockUserId,
+      email: mockEmail,
+      password: 'zahashowane_haslo_z_bazy',
+    };
+    User.findOne.mockResolvedValue(mockUser);
+    bcrypt.compare.mockResolvedValue(true);
+
+    const result = await authService.login(mockEmail, mockPassword);
+
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(20);
+    expect(User.findOne).toHaveBeenCalledWith({ email: mockEmail.toLowerCase() });
+    expect(bcrypt.compare).toHaveBeenCalledWith(mockPassword, mockUser.password);
+  });
+
+  // Dodatkowe testy dla przypadków brzegowych
+  it('Powinien rzucić błąd gdy email jest pusty', async () => {
+    await expect(authService.login('', mockPassword))
+      .rejects
+      .toThrow('Email jest wymagany.');
+  });
+
+  it('Powinien rzucić błąd gdy hasło jest puste', async () => {
+    await expect(authService.login(mockEmail, ''))
+      .rejects
+      .toThrow('Hasło jest wymagane.');
+  });
+});
+
+==================================
+__tests__\services\commentService.test.js v.1
+==================================
+
+// __tests__/services/commentService.test.js
+const commentService = require('../../services/commentService');
+const Comment = require('../../models/Comment');
+const Article = require('../../models/Article');
+
+jest.mock('../../models/Comment');
+jest.mock('../../models/Article');
+
+describe('Serwis: commentService', () => {
+  const mockArticleId = '507f1f77bcf86cd799439022';
+  const mockUserId = '507f1f77bcf86cd799439011';
+  const mockCommentId = '507f1f77bcf86cd799439033';
+  const mockCommentText = 'To jest bardzo przemyślany komentarz';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('addComment', () => {
+    it('Powinien dodać komentarz do istniejącego artykułu', async () => {
+      // ARRANGE
+      Article.findById.mockResolvedValue({ _id: mockArticleId });
+      // Mock Comment.create zamiast new Comment().save()
+      Comment.create.mockResolvedValue({
+        _id: mockCommentId,
+        text: mockCommentText,
+        article: mockArticleId,
+        author: mockUserId,
+      });
+
+      // ACT
+      const result = await commentService.addComment(
+        mockArticleId,
+        mockUserId,
+        mockCommentText,
+      );
+
+      // ASSERT
+      expect(Article.findById).toHaveBeenCalledWith(mockArticleId);
+      expect(Comment.create).toHaveBeenCalledWith({
+        text: mockCommentText,
+        article: mockArticleId,
+        author: mockUserId,
+      });
+      expect(result.text).toBe(mockCommentText);
+    });
+
+    it('Powinien rzucić błąd jeśli artykuł nie istnieje', async () => {
+      // ARRANGE
+      Article.findById.mockResolvedValue(null);
+
+      // ACT & ASSERT - Uwzględnij kropkę w komunikacie
+      await expect(
+        commentService.addComment(mockArticleId, mockUserId, mockCommentText),
+      ).rejects.toThrow('Nie znaleziono artykułu.');
+    });
+
+    it('Powinien rzucić błąd walidacji dla zbyt krótkiego komentarza', async () => {
+      // ARRANGE
+      Article.findById.mockResolvedValue({ _id: mockArticleId });
+      const shortText = 'Krótk';
+
+      // ACT & ASSERT
+      await expect(
+        commentService.addComment(mockArticleId, mockUserId, shortText),
+      ).rejects.toThrow('Komentarz musi mieć co najmniej 6 znaków');
+
+      // Dodatkowo: upewnij się, że Comment.create NIE został wywołany
+      expect(Comment.create).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('getComments', () => {
+    it('Powinien zwrócić listę komentarzy dla artykułu', async () => {
+      // ARRANGE
+      const mockComments = [
+        { _id: 'comment1', text: 'Komentarz 1', author: { username: 'user1' } },
+        { _id: 'comment2', text: 'Komentarz 2', author: { username: 'user2' } },
+      ];
+      Comment.find.mockReturnValue({
+        populate: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue(mockComments),
+      });
+
+      // ACT
+      const result = await commentService.getComments(mockArticleId);
+
+      // ASSERT
+      expect(Comment.find).toHaveBeenCalledWith({ article: mockArticleId });
+      expect(result).toEqual(mockComments);
+    });
+  });
+
+  describe('updateComment', () => {
+    it('Powinien zaktualizować komentarz jeśli użytkownik jest autorem', async () => {
+      // ARRANGE
+      const mockComment = {
+        _id: mockCommentId,
+        text: 'Stara treść',
+        author: mockUserId,
+        save: jest.fn().mockResolvedValue({
+          _id: mockCommentId,
+          text: 'Nowa treść',
+          author: mockUserId,
+        }),
+      };
+      Comment.findById.mockResolvedValue(mockComment);
+
+      // ACT
+      const result = await commentService.updateComment(
+        mockCommentId,
+        mockUserId,
+        'user',
+        'Nowa treść',
+      );
+
+      // ASSERT
+      expect(Comment.findById).toHaveBeenCalledWith(mockCommentId);
+      expect(mockComment.save).toHaveBeenCalled();
+      expect(result.text).toBe('Nowa treść');
+    });
+
+    it('Powinien rzucić błąd jeśli komentarz nie istnieje', async () => {
+      // ARRANGE
+      Comment.findById.mockResolvedValue(null);
+
+      // ACT & ASSERT
+      await expect(
+        commentService.updateComment(
+          mockCommentId,
+          mockUserId,
+          'user',
+          'Nowa treść',
+        ),
+      ).rejects.toThrow('Komentarz nie istnieje');
+    });
+  });
+
+  describe('deleteComment', () => {
+    it('Powinien usunąć komentarz jeśli użytkownik jest autorem', async () => {
+      // ARRANGE
+      const mockComment = {
+        _id: mockCommentId,
+        author: mockUserId,
+        deleteOne: jest.fn().mockResolvedValue(true),
+      };
+      Comment.findById.mockResolvedValue(mockComment);
+
+      // ACT
+      await commentService.deleteComment(mockCommentId, mockUserId, 'user');
+
+      // ASSERT
+      expect(Comment.findById).toHaveBeenCalledWith(mockCommentId);
+      expect(mockComment.deleteOne).toHaveBeenCalled();
+    });
+  });
+});
+
+
+==================================
+__tests__\services\userService.integration.test.js v.2
+==================================
+
+// __tests__/services/userService.integration.test.js
+const mongoose = require('mongoose');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+const bcrypt = require('bcryptjs');
+const User = require('../../models/User');
+const userService = require('../../services/userService');
+
+let mongoServer;
+
+// ✅ Zwiększ timeout dla wszystkich testów
+jest.setTimeout(30000);
+
+beforeAll(async () => {
+  try {
+    mongoServer = await MongoMemoryServer.create();
+    const uri = mongoServer.getUri();
+    await mongoose.connect(uri);
+    console.log('Connected to MongoDB Memory Server:', uri);
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw error;
+  }
+});
+
+afterEach(async () => {
+  try {
+    await User.deleteMany({});
+  } catch (error) {
+    console.error('Error cleaning up users:', error);
+  }
+});
+
+afterAll(async () => {
+  try {
+    // ✅ Bezpieczne zamykanie połączenia
+    if (mongoose.connection.readyState !== 0) {
+      await mongoose.disconnect();
+    }
+    // ✅ Bezpieczne zatrzymanie memory server
+    if (mongoServer) {
+      await mongoServer.stop();
+    }
+    console.log('MongoDB connection closed');
+  } catch (error) {
+    console.error('Error closing MongoDB connection:', error);
+  }
+});
+
+describe('Serwis: userService - testy integracyjne', () => {
+  it('Powinien stworzyć i pobrać użytkownika bez hasła', async () => {
+    const user = await User.create({
+      email: 'test@test.com',
+      password: 'hashedPassword',
+      username: 'Tester',
+      role: 'user',
+    });
+
+    const profile = await userService.getProfile(user._id);
+
+    expect(profile).toMatchObject({
+      email: 'test@test.com',
+      username: 'Tester',
+      role: 'user',
+    });
+    expect(profile.password).toBeUndefined();
+  });
+
+  it('Powinien zaktualizować nazwę użytkownika', async () => {
+    const user = await User.create({
+      email: 'abc@test.com',
+      password: 'hashedPassword',
+      username: 'OldName',
+      role: 'user',
+    });
+
+    const updated = await userService.updateProfile(user._id, {
+      username: 'NewName',
+    });
+
+    expect(updated.username).toBe('NewName');
+    expect(updated.password).toBeUndefined();
+  });
+
+  it('Powinien rzucić błąd gdy użytkownik nie istnieje', async () => {
+    const fakeId = new mongoose.Types.ObjectId();
+    await expect(userService.getProfile(fakeId)).rejects.toThrow(
+      'Użytkownik nie istnieje',
+    );
+  });
+
+  it('Powinien zmienić hasło gdy stare hasło jest poprawne', async () => {
+    const hashed = await bcrypt.hash('oldPass', 10);
+    const user = await User.create({
+      email: 'pass@test.com',
+      password: hashed,
+      username: 'PassUser',
+      role: 'user',
+    });
+
+    await userService.changePassword(user._id, 'oldPass', 'newPass');
+    const updated = await User.findById(user._id);
+
+    const isMatch = await bcrypt.compare('newPass', updated.password);
+    expect(isMatch).toBe(true);
+  });
+
+  it('Powinien rzucić błąd gdy stare hasło jest nieprawidłowe', async () => {
+    const hashed = await bcrypt.hash('oldPass', 10);
+    const user = await User.create({
+      email: 'failpass@test.com',
+      password: hashed,
+      username: 'FailUser',
+      role: 'user',
+    });
+
+    await expect(
+      userService.changePassword(user._id, 'wrongPass', 'newPass'),
+    ).rejects.toThrow('Stare hasło jest nieprawidłowe.');
+  });
+
+  it('Powinien zwrócić listę użytkowników bez haseł', async () => {
+    await User.create([
+      {
+        email: 'user1@test.com',
+        password: 'hashedPassword1', // min 6 znaków
+        username: 'User1',
+        role: 'user',
+      },
+      {
+        email: 'user2@test.com',
+        password: 'hashedPassword2', // min 6 znaków
+        username: 'User2',
+        role: 'user',
+      },
+    ]);
+
+    const users = await userService.listUsers();
+
+    expect(users).toHaveLength(2);
+    users.forEach((u) => expect(u.password).toBeUndefined());
+  });
+
+  it('Powinien zmienić rolę użytkownika na admin', async () => {
+    const user = await User.create({
+      email: 'role@test.com',
+      password: 'hashed',
+      username: 'RoleUser',
+      role: 'user',
+    });
+
+    const updated = await userService.changeRole(user._id, 'admin');
+
+    expect(updated.role).toBe('admin');
+    expect(updated.password).toBeUndefined();
+  });
+
+  it('Powinien rzucić błąd dla nieprawidłowej roli', async () => {
+    const user = await User.create({
+      email: 'badrole@test.com',
+      password: 'hashed',
+      username: 'BadRole',
+      role: 'user',
+    });
+
+    await expect(
+      userService.changeRole(user._id, 'superadmin'),
+    ).rejects.toThrow('Nieprawidłowa rola.');
+  });
+
+  it('Powinien usunąć użytkownika', async () => {
+    const user = await User.create({
+      email: 'del@test.com',
+      password: 'hashed',
+      username: 'DeleteMe',
+      role: 'user',
+    });
+
+    await userService.deleteUser(user._id);
+
+    const found = await User.findById(user._id);
+    expect(found).toBeNull();
+  });
+});
+
+
+==================================
+__tests__\services\userService.test.js v.1
+==================================
+
+const bcrypt = require('bcryptjs');
+const User = require('../../models/User');
+const userService = require('../../services/userService');
+
+jest.mock('../../models/User');
+jest.mock('bcryptjs');
+
+describe('Serwis: userService', () => {
+  const mockUser = {
+    _id: '507f1f77bcf86cd799439011',
+    username: 'testuser',
+    email: 'test@example.com',
+    password: 'hashedpassword',
+    role: 'user',
+    save: jest.fn().mockResolvedValue(true),
+    deleteOne: jest.fn().mockResolvedValue(true),
+    toObject: jest.fn(function () {
+      const obj = { ...this };
+      delete obj.password;
+      return obj;
+    }),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  // --- getProfile ---
+  describe('getProfile', () => {
+    it('Powinien zwrócić profil użytkownika bez hasła', async () => {
+      User.findById.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue({ ...mockUser, password: undefined }),
+      }));
+
+      const result = await userService.getProfile(mockUser._id);
+
+      expect(User.findById).toHaveBeenCalledWith(mockUser._id);
+      expect(result.password).toBeUndefined();
+      expect(result._id).toBe(mockUser._id);
+    });
+
+    it('Powinien rzucić błąd gdy użytkownik nie istnieje', async () => {
+      User.findById.mockImplementation(() => ({
+        select: jest.fn().mockResolvedValue(null),
+      }));
+
+      await expect(userService.getProfile('nonexistent')).rejects.toThrow('Użytkownik nie istnieje');
+    });
+  });
+
+  // --- updateProfile ---
+  describe('updateProfile', () => {
+    it('Powinien zaktualizować nazwę użytkownika', async () => {
+      User.findById.mockResolvedValue({ ...mockUser });
+      const result = await userService.updateProfile(mockUser._id, { username: 'newname' });
+      expect(result.username).toBe('newname');
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it('Powinien rzucić błąd dla zbyt krótkiej nazwy użytkownika', async () => {
+      await expect(userService.updateProfile(mockUser._id, { username: 'ab' }))
+        .rejects.toThrow('Nazwa użytkownika musi mieć co najmniej 3 znaki.');
+    });
+
+    it('Powinien rzucić błąd gdy użytkownik nie istnieje', async () => {
+      User.findById.mockResolvedValue(null);
+      await expect(userService.updateProfile(mockUser._id, { username: 'newname' }))
+        .rejects.toThrow('Użytkownik nie istnieje');
+    });
+  });
+
+  // --- changePassword ---
+  describe('changePassword', () => {
+    it('Powinien zmienić hasło gdy stare hasło jest poprawne', async () => {
+      User.findById.mockResolvedValue({ ...mockUser });
+      bcrypt.compare.mockResolvedValue(true);
+      bcrypt.hash.mockResolvedValue('newhashedpassword');
+
+      await userService.changePassword(mockUser._id, 'oldPassword', 'newPassword');
+
+      expect(bcrypt.compare).toHaveBeenCalledWith('oldPassword', mockUser.password);
+      expect(bcrypt.hash).toHaveBeenCalledWith('newPassword', 10);
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it('Powinien rzucić błąd gdy stare hasło jest nieprawidłowe', async () => {
+      User.findById.mockResolvedValue({ ...mockUser });
+      bcrypt.compare.mockResolvedValue(false);
+
+      await expect(userService.changePassword(mockUser._id, 'wrongOld', 'newPassword'))
+        .rejects.toThrow('Stare hasło jest nieprawidłowe.');
+    });
+
+    it('Powinien rzucić błąd gdy nowe hasło jest za krótkie', async () => {
+      await expect(userService.changePassword(mockUser._id, 'oldPassword', '123'))
+        .rejects.toThrow('Nowe hasło musi mieć co najmniej 6 znaków.');
+    });
+  });
+
+  // --- listUsers ---
+  describe('listUsers', () => {
+    it('Powinien zwrócić listę użytkowników bez haseł', async () => {
+      User.find.mockImplementation(() => ({
+        select: jest.fn().mockReturnThis(),
+        sort: jest.fn().mockResolvedValue([
+          { ...mockUser, password: undefined },
+          { ...mockUser, _id: '2', password: undefined },
+        ]),
+      }));
+
+      const result = await userService.listUsers();
+
+      expect(result).toHaveLength(2);
+      result.forEach(u => expect(u.password).toBeUndefined());
+    });
+  });
+
+  // --- changeRole ---
+  describe('changeRole', () => {
+    it('Powinien zmienić rolę użytkownika na admin', async () => {
+      User.findById.mockResolvedValue({ ...mockUser });
+      const result = await userService.changeRole(mockUser._id, 'admin');
+      expect(result.role).toBe('admin');
+      expect(mockUser.save).toHaveBeenCalled();
+    });
+
+    it('Powinien rzucić błąd dla nieprawidłowej roli', async () => {
+      await expect(userService.changeRole(mockUser._id, 'invalid'))
+        .rejects.toThrow('Nieprawidłowa rola.');
+    });
+
+    it('Powinien rzucić błąd gdy użytkownik nie istnieje', async () => {
+      User.findById.mockResolvedValue(null);
+      await expect(userService.changeRole(mockUser._id, 'admin'))
+        .rejects.toThrow('Użytkownik nie istnieje.');
+    });
+  });
+
+  // --- deleteUser ---
+  describe('deleteUser', () => {
+    it('Powinien usunąć użytkownika', async () => {
+      User.findById.mockResolvedValue({ ...mockUser });
+      await userService.deleteUser(mockUser._id);
+      expect(mockUser.deleteOne).toHaveBeenCalled();
+    });
+
+    it('Powinien rzucić błąd gdy użytkownik nie istnieje', async () => {
+      User.findById.mockResolvedValue(null);
+      await expect(userService.deleteUser(mockUser._id))
+        .rejects.toThrow('Użytkownik nie istnieje');
+    });
+  });
+});
+
+
+==================================
+__tests__\utils\sanitize.test.js v.2
+==================================
+
+const {
+  sanitizeTitle,
+  sanitizeBody,
+  sanitizeComment,
+  sanitizeStrict,
+} = require('../../utils/sanitize');
+
+describe('Utils: Sanityzacja danych', () => {
+  describe('sanitizeTitle', () => {
+    it('Powinien usuwać wszystkie tagi HTML', () => {
+      const input = '<script>alert("xss")</script>Tytuł <b>pogrubiony</b>';
+      expect(sanitizeTitle(input)).toBe('Tytuł pogrubiony');
+    });
+
+    it('Powinien trimować białe znaki', () => {
+      const input = '   Tytuł z spacjami   ';
+      expect(sanitizeTitle(input)).toBe('Tytuł z spacjami');
+    });
+  });
+
+  describe('sanitizeStrict', () => {
+    it('Powinien usuwać wszystkie tagi HTML', () => {
+      const input = '<script>alert("xss")</script>Tekst <b>pogrubiony</b>';
+      expect(sanitizeStrict(input)).toBe('Tekst pogrubiony');
+    });
+
+    it('Powinien ograniczać długość do 500 znaków', () => {
+      const longInput = 'A'.repeat(600);
+      expect(sanitizeStrict(longInput).length).toBe(500);
+    });
+
+    it('Powinien radzić sobie z null/undefined', () => {
+      expect(sanitizeStrict(null)).toBe('');
+      expect(sanitizeStrict(undefined)).toBe('');
+    });
+  });
+
+  describe('sanitizeBody', () => {
+    it('Powinien pozwalać na podstawowe tagi formatujące', () => {
+      const input =
+        '<p>Paragraf</p><b>pogrubienie</b><a href="https://example.com">link</a>';
+      const result = sanitizeBody(input);
+
+      expect(result).toContain('<p>');
+      expect(result).toContain('<b>');
+      expect(result).toContain('<a href="https://example.com"');
+      expect(result).not.toContain('<script>');
+    });
+
+    it('Powinien dodawać atrybuty bezpieczeństwa do linków', () => {
+      const input = '<a href="https://example.com">link</a>';
+      const result = sanitizeBody(input);
+
+      expect(result).toContain('target="_blank"');
+      expect(result).toContain('rel="noopener noreferrer nofollow ugc"');
+    });
+  });
+
+  describe('sanitizeComment', () => {
+    it('Powinien pozwalać na podstawowe formatowanie w komentarzach', () => {
+      const input =
+        '<b>pogrubienie</b> <i>kursywa</i> <a href="https://example.com">link</a>';
+      const result = sanitizeComment(input);
+
+      expect(result).toContain('<b>pogrubienie</b>');
+      expect(result).toContain('<i>kursywa</i>');
+      expect(result).toContain('<a href="https://example.com"');
+      expect(result).not.toContain('<script>');
+    });
+
+    it('Powinien usuwać niebezpieczne tagi z komentarzy', () => {
+      const input =
+        'Safe <b>bold</b> but <img src="x" onerror="alert(1)"> dangerous <script>alert(2)</script>';
+      const result = sanitizeComment(input);
+
+      expect(result).toContain('<b>bold</b>'); // Bezpieczne tagi pozostają
+      expect(result).not.toContain('<img'); // Niebezpieczne tagi są usuwane
+      expect(result).not.toContain('<script>'); // Niebezpieczne tagi są usuwane
+      expect(result).not.toContain('onerror'); // Niebezpieczne atrybuty są usuwane
+      expect(result).toBe('Safe <b>bold</b> but  dangerous'); // Tekst pozostaje
+    });
+
+    it('Powinien zabezpieczać linki w komentarzach', () => {
+      const input = '<a href="https://example.com">link</a>';
+      const result = sanitizeComment(input);
+
+      expect(result).toContain('target="_blank"');
+      expect(result).toContain('rel="noopener noreferrer nofollow ugc"');
+      expect(result).toContain('href="https://example.com"');
+    });
+
+    it('Powinien blokować javascript: w linkach', () => {
+      const input = '<a href="javascript:alert(1)">malicious link</a>';
+      const result = sanitizeComment(input);
+
+      // Link z javascript: powinien być CAŁKOWICIE usunięty
+      expect(result).not.toContain('href="javascript:');
+      expect(result).not.toContain('malicious link');
+      expect(result).toBe(''); // Powinno być puste
+    });
+
+    it('Powinien usuwać niebezpieczne atrybuty zdarzeń', () => {
+      const input =
+        '<span onclick="alert(1)" onmouseover="alert(2)">text</span>';
+      const result = sanitizeComment(input);
+
+      // Niebezpieczne atrybuty powinny być usunięte
+      expect(result).not.toContain('onclick');
+      expect(result).not.toContain('onmouseover');
+      expect(result).toBe('text'); // Tekst powinien pozostać
+    });
+  });
+});
+
+
+==================================
+backup\2025-09-05\cms\articles.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\2025-09-05\cms\articles.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"author":{"$numberInt":"1"},"createdAt":{"$numberInt":"-1"}},"name":"author_1_createdAt_-1","background":true},{"v":{"$numberInt":"2"},"key":{"_fts":"text","_ftsx":{"$numberInt":"1"}},"name":"title_text_content_text","background":true,"weights":{"content":{"$numberInt":"1"},"title":{"$numberInt":"1"}},"default_language":"english","language_override":"language","textIndexVersion":{"$numberInt":"3"}},{"v":{"$numberInt":"2"},"key":{"createdAt":{"$numberInt":"-1"}},"name":"createdAt_-1","background":true}],"uuid":"da9501f4b0e048c787069ecb917ed339","collectionName":"articles","type":"collection"}
+
+==================================
+backup\2025-09-05\cms\comments.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\2025-09-05\cms\comments.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"article":{"$numberInt":"1"}},"name":"article_1","background":true},{"v":{"$numberInt":"2"},"key":{"article":{"$numberInt":"1"},"createdAt":{"$numberInt":"-1"}},"name":"article_1_createdAt_-1","background":true},{"v":{"$numberInt":"2"},"key":{"author":{"$numberInt":"1"}},"name":"author_1","background":true}],"uuid":"66d0c0aa257c4c7f96be19954aded15b","collectionName":"comments","type":"collection"}
+
+==================================
+backup\2025-09-05\cms\pendingusers.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\2025-09-05\cms\pendingusers.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"email":{"$numberInt":"1"}},"name":"email_1","background":true,"unique":true},{"v":{"$numberInt":"2"},"key":{"createdAt":{"$numberInt":"1"}},"name":"createdAt_1","background":true,"expireAfterSeconds":{"$numberInt":"86400"}}],"uuid":"7825ca18c1674e4da2d08d0057e538ef","collectionName":"pendingusers","type":"collection"}
+
+==================================
+backup\2025-09-05\cms\prelude.json v.1
+==================================
+
+{"ServerVersion":"8.0.13","ToolVersion":"100.13.0"}
+
+==================================
+backup\2025-09-05\cms\users.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\2025-09-05\cms\users.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"username":{"$numberInt":"1"}},"name":"username_1","background":true,"unique":true},{"v":{"$numberInt":"2"},"key":{"email":{"$numberInt":"1"}},"name":"email_1","background":true,"unique":true},{"v":{"$numberInt":"2"},"key":{"createdAt":{"$numberInt":"-1"}},"name":"createdAt_-1","background":true}],"uuid":"45a48700a8f14fe7ab271a3029364943","collectionName":"users","type":"collection"}
+
+==================================
+backup\cms\articles.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\cms\articles.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"author":{"$numberInt":"1"},"createdAt":{"$numberInt":"-1"}},"name":"author_1_createdAt_-1","background":true},{"v":{"$numberInt":"2"},"key":{"_fts":"text","_ftsx":{"$numberInt":"1"}},"name":"title_text_content_text","background":true,"weights":{"content":{"$numberInt":"1"},"title":{"$numberInt":"1"}},"default_language":"english","language_override":"language","textIndexVersion":{"$numberInt":"3"}}],"uuid":"7517bc407b74419db0e8624f43a01a0b","collectionName":"articles","type":"collection"}
+
+==================================
+backup\cms\comments.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\cms\comments.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"article":{"$numberInt":"1"}},"name":"article_1","background":true}],"uuid":"49a1ac7e42a344b6a5c7fb470f3b9416","collectionName":"comments","type":"collection"}
+
+==================================
+backup\cms\pendingusers.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\cms\pendingusers.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"email":{"$numberInt":"1"}},"name":"email_1","background":true,"unique":true},{"v":{"$numberInt":"2"},"key":{"createdAt":{"$numberInt":"1"}},"name":"createdAt_1","background":true,"expireAfterSeconds":{"$numberInt":"86400"}}],"uuid":"3bca25e0c9ea484484956c2a6730026d","collectionName":"pendingusers","type":"collection"}
+
+==================================
+backup\cms\users.bson v.1
+==================================
+
+<plik binarny, nie wyświetlono zawartości>
+
+==================================
+backup\cms\users.metadata.json v.1
+==================================
+
+{"indexes":[{"v":{"$numberInt":"2"},"key":{"_id":{"$numberInt":"1"}},"name":"_id_"},{"v":{"$numberInt":"2"},"key":{"username":{"$numberInt":"1"}},"name":"username_1","background":true,"unique":true},{"v":{"$numberInt":"2"},"key":{"email":{"$numberInt":"1"}},"name":"email_1","background":true,"unique":true}],"uuid":"fff3b0f67d424a188cedaf8d37c22388","collectionName":"users","type":"collection"}
+
+==================================
+controllers\adminController.js v.1
+==================================
+
+const logger = require('../utils/logger');
+const bcrypt = require('bcryptjs');
+const PendingUser = require('../models/PendingUser');
+const User = require('../models/User');
+const { sanitizeTitle } = require('../utils/sanitize');
+const { sendMail } = require('../utils/mailer');
+const {
+  approvedUserEmail,
+  rejectedUserEmail,
+} = require('../utils/emailTemplates');
+const AppError = require('../utils/AppError');
+
+// GET /api/admin/pending-users
+const getPendingUsers = async (req, res, next) => {
+  try {
+    const { search = '', page = 1, limit = 10 } = req.query;
+
+    const query = {
+      $or: [
+        { username: { $regex: search, $options: 'i' } },
+        { email: { $regex: search, $options: 'i' } },
+      ],
+    };
+
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    const [total, users] = await Promise.all([
+      PendingUser.countDocuments(query),
+      PendingUser.find(query)
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(parseInt(limit))
+        .lean(),
+    ]);
+
+    res.json({
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      users,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/admin/approve/:id
+const approveUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const pending = await PendingUser.findById(id);
+    if (!pending) return next(new AppError('Wniosek nie istnieje.', 404));
+
+    const exists = await User.findOne({ email: pending.email });
+    if (exists) {
+      await pending.deleteOne();
+      return next(new AppError('Email jest już zajęty w systemie.', 400));
+    }
+
+    const hashed = await bcrypt.hash(String(pending.password), 10);
+    const user = new User({
+      username: sanitizeTitle(pending.username),
+      email: pending.email,
+      password: hashed,
+      role: pending.role,
+    });
+    const savedUser = await user.save();
+
+    await pending.deleteOne();
+
+    // wysyłka maila (best-effort)
+    try {
+      const tpl = approvedUserEmail({
+        username: user.username,
+        email: user.email,
+      });
+      await sendMail({
+        to: user.email,
+        subject: tpl.subject,
+        text: tpl.text,
+        html: tpl.html,
+      });
+    } catch (mailError) {
+      logger.warn(
+        'approveUser: mail send failed:',
+        mailError?.message || mailError,
+      );
+    }
+
+    return res.json({
+      message: 'Użytkownik zatwierdzony i dodany do systemu.',
+      userId: savedUser._id, // ← UŻYJ ZAPISANEGO DOKUMENTU
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /api/admin/reject/:id
+const rejectUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const pending = await PendingUser.findById(id);
+    if (!pending) return next(new AppError('Wniosek nie istnieje.', 404));
+
+    // wysyłka maila (best-effort)
+    try {
+      const tpl = rejectedUserEmail({
+        username: pending.username,
+        email: pending.email,
+      });
+      await sendMail({
+        to: pending.email,
+        subject: tpl.subject,
+        text: tpl.text,
+        html: tpl.html,
+      });
+    } catch (mailError) {
+      logger.warn(
+        'rejectUser: mail send failed:',
+        mailError?.message || mailError,
+      );
+    }
+
+    await pending.deleteOne();
+    return res.json({ message: 'Wniosek został odrzucony.' });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  getPendingUsers,
+  approveUser,
+  rejectUser,
+};
+
+
+==================================
+controllers\articleController.js v.1
+==================================
+
+const logger = require('../utils/logger');
+const articleService = require('../services/articleService');
+const fs = require('fs');
+const path = require('path');
+
+const UPLOADS_DIR = path.join(__dirname, '..', 'uploads');
+
+// Helper function (only what's necessary for the controller)
+function toUploadsRel(p) {
+  if (!p) return '';
+  const s = String(p);
+  const m = s.match(/uploads[/\\]+(.+)$/i);
+  return m ? m[1] : path.basename(s);
+}
+
+// POST /api/articles
+const createArticle = async (req, res) => {
+  try {
+    const { title, content } = req.body;
+
+    // Map uploaded files to image paths
+    const imagePaths = (req.files || []).map((f) => `uploads/${f.filename}`.replace(/\\/g, '/'));
+
+    // Authorization check
+    const author = req.user ? req.user._id : null;
+    if (!author) {
+      // Clean up uploads if no authorization
+      imagePaths.forEach((rel) => {
+        const full = path.join(UPLOADS_DIR, toUploadsRel(rel));
+        fs.unlink(full, () => {});
+      });
+      return res.status(401).json({ message: 'Nieautoryzowany dostęp' });
+    }
+
+    // Call service
+    const newArticle = await articleService.createArticle(title, content, author, imagePaths);
+
+    return res.status(201).json({ message: 'Artykuł utworzony', article: newArticle });
+  } catch (error) {
+    // Clean up uploads on error
+    if (req.files && req.files.length > 0) {
+      for (const f of req.files) {
+        const full = path.join(UPLOADS_DIR, toUploadsRel(f.filename || f.path));
+        fs.unlink(full, () => {});
+      }
+    }
+    logger.error('Błąd tworzenia artykułu:', error);
+    if (error.message.includes('Tytuł musi mieć') || error.message.includes('Treść musi mieć') || error.message.includes('jest wymagana')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// GET /api/articles
+const getArticles = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 5;
+    const search = (req.query.q || '').trim();
+    const sort = req.query.sort || 'newest';
+
+    const result = await articleService.getArticles(page, limit, search, sort);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Błąd pobierania artykułów:', error);
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// GET /api/articles/:id
+const getArticleById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const article = await articleService.getArticleById(id);
+    return res.status(200).json(article);
+  } catch (error) {
+    logger.error('Błąd pobierania artykułu:', error);
+    if (error.message === 'Nie znaleziono artykułu') {
+      return res.status(404).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// PUT /api/articles/:id
+const updateArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, content, removeImages } = req.body;
+
+    const updateData = { title, content, removeImages };
+    const result = await articleService.updateArticle(
+      id,
+      updateData,
+      req.user._id,
+      req.user.role,
+      req.files,
+    );
+
+    return res.json({ message: 'Artykuł zaktualizowany', article: result });
+  } catch (error) {
+    logger.error('Błąd aktualizacji artykułu:', error);
+    if (error.message === 'Artykuł nie znaleziony') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error.message === 'Brak uprawnień do edycji') {
+      return res.status(403).json({ message: error.message });
+    }
+    if (error.message.includes('Tytuł musi mieć') || error.message.includes('Treść musi mieć')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// DELETE /api/articles/:id
+const deleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await articleService.deleteArticle(id, req.user._id, req.user.role);
+    return res.status(204).end();
+  } catch (error) {
+    logger.error('Błąd usuwania artykułu:', error);
+    if (error.message === 'Artykuł nie istnieje') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error.message === 'Brak uprawnień') {
+      return res.status(403).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// POST /api/articles/:id/like
+const toggleLikeArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await articleService.toggleLikeArticle(id, req.user._id);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Błąd toggle lajka artykułu:', error);
+    if (error.message === 'Artykuł nie znaleziony') {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error.message === 'Autor nie może polubić własnego artykułu') {
+      return res.status(400).json({
+        message: error.message,
+        liked: false,
+        totalLikes: 0,
+      });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+module.exports = {
+  createArticle,
+  getArticles,
+  getArticleById,
+  updateArticle,
+  deleteArticle,
+  toggleLikeArticle,
+};
+
+==================================
+controllers\authController.js v.1
+==================================
+
+const authService = require('../services/authService');
+
+// ZMIANA 1: Uproszczono baseCookieOptions dla lokalnego środowiska
+const baseCookieOptions = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: false,
+  path: '/',
+};
+
+// Rejestracja — użytkownik oczekujący na zatwierdzenie
+const registerPending = async (req, res) => {
+  try {
+    const { username, email, password, role } = req.body;
+    await authService.registerPending(username, email, password, role);
+    res.status(201).json({ message: 'Wniosek o rejestrację został przesłany.' });
+  } catch (error) {
+    if (error.message.includes('Email jest już zajęty') || error.message.includes('jest wymagana')) {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: 'Błąd serwera.', error });
+  }
+};
+
+// Logowanie
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const token = await authService.login(email, password);
+
+    res.cookie('token', token, {
+      ...baseCookieOptions,
+      maxAge: 24 * 60 * 60 * 1000, // 1 dzień
+    });
+
+    res.json({ message: 'Zalogowano pomyślnie.' });
+  } catch (error) {
+    if (error.message.includes('Nieprawidłowy email lub hasło') || error.message.includes('jest wymagane')) {
+      return res.status(400).json({ message: error.message });
+    }
+    res.status(500).json({ message: 'Błąd serwera.', error });
+  }
+};
+
+// Wylogowanie
+const logout = (_req, res) => {
+  res.clearCookie('token', {
+    ...baseCookieOptions,
+  });
+  res.json({ message: 'Wylogowano.' });
+};
+
+module.exports = {
+  registerPending,
+  login,
+  logout,
+};
+
+==================================
+controllers\commentController.js v.2
+==================================
+
+const logger = require('../utils/logger');
+const commentService = require('../services/commentService');
+
+// POST /api/comments/:id
+const addComment = async (req, res) => {
+  try {
+    const articleId = req.params.id;
+    const rawText = req.body?.text ?? '';
+    const comment = await commentService.addComment(
+      articleId,
+      req.user._id,
+      rawText,
+    );
+    return res.status(201).json(comment);
+  } catch (error) {
+    logger.error('Błąd podczas dodawania komentarza:', error);
+    if (
+      error.message.includes('Komentarz nie może być pusty') ||
+      error.message.includes('co najmniej 6 znaków') ||
+      error.message.includes('odfiltrowaniu')
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.message.includes('Nie znaleziono artykułu')) {
+      return res.status(404).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// GET /api/comments/:id
+const getComments = async (req, res) => {
+  try {
+    const articleId = req.params.id;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 20;
+
+    const result = await commentService.getComments(articleId, page, limit);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Błąd podczas pobierania komentarzy:', error);
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// PUT /api/comments/:id
+const updateComment = async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    const rawText = req.body?.text ?? '';
+    const comment = await commentService.updateComment(
+      commentId,
+      req.user._id,
+      req.user.role,
+      rawText,
+    );
+    return res.json(comment);
+  } catch (error) {
+    logger.error('Błąd podczas edycji komentarza:', error);
+    if (
+      error.message.includes('Komentarz nie może być pusty') ||
+      error.message.includes('co najmniej 6 znaków') ||
+      error.message.includes('odfiltrowaniu')
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+    if (error.message.includes('Komentarz nie istnieje')) {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error.message.includes('Brak uprawnień')) {
+      return res.status(403).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// DELETE /api/comments/:id
+const deleteComment = async (req, res) => {
+  try {
+    const commentId = req.params.id;
+    await commentService.deleteComment(commentId, req.user._id, req.user.role);
+    return res.status(204).end();
+  } catch (error) {
+    logger.error('Błąd podczas usuwania komentarza:', error);
+    if (error.message.includes('Komentarz nie istnieje')) {
+      return res.status(404).json({ message: error.message });
+    }
+    if (error.message.includes('Brak uprawnień')) {
+      return res.status(403).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+module.exports = {
+  addComment,
+  getComments,
+  updateComment,
+  deleteComment,
+};
+
+
+==================================
+controllers\userController.js v.2
+==================================
+
+const logger = require('../utils/logger');
+const userService = require('../services/userService');
+
+// GET /api/users/profile
+const getProfile = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' });
+    const user = await userService.getProfile(req.user._id);
+    return res.json(user);
+  } catch (error) {
+    logger.error('Błąd getProfile:', error);
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// PUT /api/users/profile
+const updateProfile = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' });
+    const user = await userService.updateProfile(req.user._id, req.body);
+    return res.json({ message: 'Profil zaktualizowany', user });
+  } catch (error) {
+    logger.error('Błąd updateProfile:', error);
+    if (error.message.includes('Nazwa użytkownika')) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// PUT /api/users/password
+const changePassword = async (req, res) => {
+  try {
+    if (!req.user) return res.status(401).json({ message: 'Brak autoryzacji' });
+    const { oldPassword, newPassword } = req.body;
+    await userService.changePassword(req.user._id, oldPassword, newPassword);
+    return res.json({ message: 'Hasło zostało zmienione.' });
+  } catch (error) {
+    logger.error('Błąd changePassword:', error);
+    if (
+      error.message.includes('Stare hasło') ||
+      error.message.includes('Nowe hasło')
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// GET /api/users (admin) - ✅ ZMODYFIKOWANE Z PAGINACJĄ
+const listUsers = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const search = req.query.search || '';
+
+    const result = await userService.listUsers(page, limit, search);
+    return res.json(result);
+  } catch (error) {
+    logger.error('Błąd listUsers:', error);
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// PUT /api/users/:id/role (admin)
+const changeRole = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { role } = req.body;
+    const user = await userService.changeRole(id, role);
+    return res.json({ message: 'Rola zaktualizowana.', user });
+  } catch (error) {
+    logger.error('Błąd changeRole:', error);
+    if (
+      error.message.includes('Rola') ||
+      error.message.includes('Nieprawidłowa')
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+// DELETE /api/users/:id (admin)
+const deleteUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await userService.deleteUser(id);
+    return res.status(204).end();
+  } catch (error) {
+    logger.error('Błąd deleteUser:', error);
+    if (error.message.includes('Użytkownik nie istnieje')) {
+      return res.status(404).json({ message: error.message });
+    }
+    return res.status(500).json({ message: 'Błąd serwera' });
+  }
+};
+
+module.exports = {
+  getProfile,
+  updateProfile,
+  changePassword,
+  listUsers,
+  changeRole,
+  deleteUser,
+};
+
+
+==================================
+docker-compose.yml v.1
+==================================
+
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+volumes:
+  redis_data:
+
+==================================
+eslint.config.js v.2
+==================================
+
+const js = require('@eslint/js');
+const globals = require('globals');
+
+module.exports = [
+  {
+    files: ['**/*.js'],
+    ignores: [
+      'node_modules/**',
+      'uploads/**',
+      'logs/**',
+      'backup/**',
+      '__tests__/coverage/**',
+      'dist/**',
+    ],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+        console: 'readonly',
+        process: 'readonly',
+        __dirname: 'readonly',
+        __filename: 'readonly',
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
+      'no-console': 'warn',
+      'prefer-const': 'error',
+      'no-var': 'error',
+      quotes: ['error', 'single', { avoidEscape: true }],
+      semi: ['error', 'always'],
+      'indent': ['error', 2],
+      'comma-dangle': ['error', 'always-multiline'],
+      'object-curly-spacing': ['error', 'always'],
+      'array-bracket-spacing': ['error', 'never'],
+    },
+  },
+  {
+    files: ['__tests__/**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.jest, // ✅ DODAJEMY GLOBALNE ZMIENNE JEST
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-console': 'off',
+      'no-unused-vars': [
+        'error',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+          destructuredArrayIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+];
+
+
+==================================
+jest-mongodb-config.js v.1
+==================================
+
+// jest-mongodb-config.js (w root projektu)
+module.exports = {
+  mongodbMemoryServerOptions: {
+    instance: {
+      dbName: 'cms-test', // nazwa testowej bazy
+    },
+    binary: {
+      version: '6.0.0', // wersja MongoDB
+      skipMD5: true,
+    },
+    autoStart: false,
+  },
+};
+
+
+==================================
+jest.config.js v.3
+==================================
+
+// jest.config.js (poprawiona wersja)
+module.exports = {
+  testEnvironment: 'node',
+  setupFiles: ['<rootDir>/jest.setup.js'],
+  collectCoverageFrom: [
+    'services/**/*.js',
+    'controllers/**/*.js',
+    'utils/**/*.js',
+    '!**/node_modules/**',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 0,
+      functions: 0,
+      lines: 0,
+      statements: 0,
+    },
+  },
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    // USUŃ lub ZMIEŃ tę linię:
+    // '__tests__/integration/.+',
+  ],
+  // Możesz dodać jawną definicję patternów testowych:
+  testMatch: ['**/__tests__/**/*.test.js', '**/__tests__/**/*.spec.js'],
+};
+
+
+==================================
+jest.setup.js v.1
+==================================
+
+// jest.setup.js
+const path = require('path');
+// Ładujemy zmienne środowiskowe Z PLIKU .env.test
+require('dotenv').config({ path: path.resolve(__dirname, '.env.test') });
+
+
+==================================
+middleware\authMiddleware.js v.1
+==================================
+
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+const AppError = require('../utils/AppError');
+
+// Middleware sprawdzający czy użytkownik jest zalogowany i ważny token
+const requireAuth = async (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return next(new AppError('Brak tokena. Dostęp zabroniony.', 401));
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password');
+
+    if (!user) {
+      return next(new AppError('Użytkownik nie istnieje', 401));
+    }
+
+    req.user = user;
+    next();
+  } catch (_error) {
+    next(new AppError('Nieprawidłowy token.', 401));
+  }
+};
+
+module.exports = requireAuth;
+
+==================================

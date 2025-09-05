@@ -1,0 +1,426 @@
+utils\emailTemplates.js v.1
+==================================
+
+// utils/emailTemplates.js
+const { APP_NAME = 'CMS' } = process.env
+
+function approvedUserEmail({ username }) {
+  const subject = `[${APP_NAME}] Twoje konto zostało zatwierdzone`
+  const text = `Cześć ${username || ''},
+
+Twoje konto w ${APP_NAME} zostało zatwierdzone. Możesz się teraz zalogować.
+
+Pozdrawiamy,
+Zespół ${APP_NAME}
+`
+  const html = `
+  <p>Cześć ${username || ''},</p>
+  <p>Twoje konto w <b>${APP_NAME}</b> zostało <b>zatwierdzone</b>. Możesz się teraz zalogować.</p>
+  <p>Pozdrawiamy,<br>Zespół ${APP_NAME}</p>
+  `
+  return { subject, text, html }
+}
+
+function rejectedUserEmail({ username }) {
+  const subject = `[${APP_NAME}] Wniosek rejestracyjny odrzucony`
+  const text = `Cześć ${username || ''},
+
+Niestety Twój wniosek rejestracyjny do ${APP_NAME} został odrzucony.
+
+Pozdrawiamy,
+Zespół ${APP_NAME}
+`
+  const html = `
+  <p>Cześć ${username || ''},</p>
+  <p>Niestety Twój wniosek rejestracyjny do <b>${APP_NAME}</b> został odrzucony.</p>
+  <p>Pozdrawiamy,<br>Zespół ${APP_NAME}</p>
+  `
+  return { subject, text, html }
+}
+
+module.exports = { approvedUserEmail, rejectedUserEmail }
+
+
+==================================
+utils\logger.js v.1
+==================================
+
+// utils/logger.js
+const winston = require('winston');
+const path = require('path');
+
+// Definiuj format logów dla developmentu (kolorowy, czytelny)
+const devFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+  winston.format.printf(({ timestamp, level, message, ...meta }) => {
+    let metaStr = '';
+    if (Object.keys(meta).length > 0) {
+      metaStr = JSON.stringify(meta, null, 2);
+    }
+    return `${timestamp} [${level}]: ${message} ${metaStr}`;
+  })
+);
+
+// Definiuj format logów dla productionu (JSON, strukturalny)
+const prodFormat = winston.format.combine(
+  winston.format.timestamp(),
+  winston.format.json() // Loguje jako JSON dla łatwego parsowania
+);
+
+// Określ, który format użyć w zależności od środowiska
+const format = process.env.NODE_ENV === 'production' ? prodFormat : devFormat;
+
+// Konfiguruj transporty (gdzie logować)
+const transports = [
+  // Zawsze loguj do konsoli
+  new winston.transports.Console(),
+];
+
+// W production dodaj również logowanie do pliku errors.log
+if (process.env.NODE_ENV === 'production') {
+  transports.push(
+    new winston.transports.File({
+      filename: path.join(__dirname, '..', 'logs', 'errors.log'),
+      level: 'error', // Loguj tylko błędy do tego pliku
+      maxsize: 5242880, // 5MB
+      maxFiles: 5,
+    })
+  );
+  // Możesz dodać też transport dla wszystkich logów
+  // transports.push(new winston.transports.File({ filename: 'logs/combined.log' }));
+}
+
+// Utwórz i eksportuj instancję loggera
+const logger = winston.createLogger({
+  level: process.env.LOG_LEVEL || 'info', // Poziom logowania (np. 'debug', 'error')
+  format: format,
+  transports: transports,
+});
+
+module.exports = logger;
+
+==================================
+utils\mailer.js v.1
+==================================
+
+// utils/mailer.js
+const nodemailer = require('nodemailer')
+
+const {
+  SMTP_HOST,
+  SMTP_PORT,
+  SMTP_SECURE,
+  SMTP_USER,
+  SMTP_PASS,
+  MAIL_FROM = 'no-reply@example.com'
+} = process.env
+
+// pojedynczy transport – wielokrotne użycie
+const transporter = nodemailer.createTransport({
+  host: SMTP_HOST,
+  port: Number(SMTP_PORT) || 587,
+  secure: String(SMTP_SECURE) === 'true',
+  auth: SMTP_USER && SMTP_PASS ? { user: SMTP_USER, pass: SMTP_PASS } : undefined
+})
+
+// prosta funkcja wysyłki
+async function sendMail({ to, subject, text, html }) {
+  if (!to) throw new Error('Brak adresata (to)')
+  const info = await transporter.sendMail({
+    from: MAIL_FROM,
+    to,
+    subject,
+    text,
+    html
+  })
+  return info
+}
+
+module.exports = { sendMail, transporter }
+
+
+==================================
+utils\queryLogger.js v.2
+==================================
+
+// utils/queryLogger.js
+const mongoose = require('mongoose');
+
+// Włącz logging zapytań MongoDB
+mongoose.set('debug', function (coll, method, query, doc) {
+  console.log(`🗄️ MongoDB Query: ${coll}.${method}`, {
+    query: JSON.stringify(query),
+    doc: doc ? JSON.stringify(doc) : undefined,
+  });
+});
+
+module.exports = mongoose;
+
+
+==================================
+utils\redisClient.js v.1
+==================================
+
+// utils/redisClient.js
+const redis = require('redis');
+
+class RedisClient {
+  constructor() {
+    this.client = null;
+    this.isConnected = false;
+  }
+
+  async connect() {
+    if (this.client) return this.client;
+
+    try {
+      this.client = redis.createClient({
+        url: process.env.REDIS_URL || 'redis://localhost:6379',
+        socket: {
+          reconnectStrategy: (retries) => {
+            if (retries > 10) {
+              console.log('Too many retries on Redis. Connection terminated');
+              return new Error('Too many retries');
+            }
+            return Math.min(retries * 100, 3000);
+          },
+        },
+      });
+
+      this.client.on('error', (err) => {
+        console.error('Redis Client Error:', err);
+        this.isConnected = false;
+      });
+
+      this.client.on('connect', () => {
+        console.log('Redis Client Connected');
+        this.isConnected = true;
+      });
+
+      this.client.on('end', () => {
+        console.log('Redis Client Disconnected');
+        this.isConnected = false;
+      });
+
+      await this.client.connect();
+      return this.client;
+    } catch (error) {
+      console.error('Failed to connect to Redis:', error);
+      this.isConnected = false;
+      return null;
+    }
+  }
+
+  async get(key) {
+    if (!this.isConnected) return null;
+    try {
+      return await this.client.get(key);
+    } catch (error) {
+      console.error('Redis get error:', error);
+      return null;
+    }
+  }
+
+  async set(key, value, expiration = 3600) { // 1 godzina domyślnie
+    if (!this.isConnected) return null;
+    try {
+      return await this.client.setEx(key, expiration, value);
+    } catch (error) {
+      console.error('Redis set error:', error);
+      return null;
+    }
+  }
+
+  async del(key) {
+    if (!this.isConnected) return null;
+    try {
+      return await this.client.del(key);
+    } catch (error) {
+      console.error('Redis delete error:', error);
+      return null;
+    }
+  }
+
+  async flushAll() {
+    if (!this.isConnected) return null;
+    try {
+      return await this.client.flushAll();
+    } catch (error) {
+      console.error('Redis flushAll error:', error);
+      return null;
+    }
+  }
+
+  async disconnect() {
+    if (this.client) {
+      await this.client.quit();
+      this.isConnected = false;
+    }
+  }
+}
+
+module.exports = new RedisClient();
+
+==================================
+utils\sanitize.js v.3
+==================================
+
+const sanitizeHtml = require('sanitize-html');
+
+// Tytuły: bez HTML - CAŁKOWICIE BEZ TAGÓW
+function sanitizeTitle(text) {
+  const s = String(text ?? '');
+  return sanitizeHtml(s, {
+    allowedTags: [],
+    allowedAttributes: {},
+    disallowedTagsMode: 'discard',
+  }).trim();
+}
+
+// Treść artykułu: bogate formatowanie
+const BODY_CFG = {
+  allowedTags: [
+    'b',
+    'i',
+    'em',
+    'strong',
+    'a',
+    'p',
+    'br',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'code',
+    'pre',
+    'h1',
+    'h2',
+    'h3',
+    'h4',
+    'h5',
+    'h6',
+  ],
+  allowedAttributes: {
+    a: ['href', 'title', 'target', 'rel'],
+    img: ['src', 'alt', 'width', 'height'],
+    code: ['class'],
+  },
+  allowedSchemes: ['http', 'https', 'mailto', 'data'],
+  disallowedTagsMode: 'discard',
+  transformTags: {
+    a: (tagName, attribs) => ({
+      tagName: 'a',
+      attribs: {
+        ...attribs,
+        target: '_blank',
+        rel: 'noopener noreferrer nofollow ugc',
+      },
+    }),
+  },
+};
+
+function sanitizeBody(html) {
+  const s = String(html ?? '');
+  return sanitizeHtml(s, BODY_CFG).trim();
+}
+
+// Komentarze: MINIMALNE formatowanie + FILTROWANIE NIEBEZPIECZNYCH TAGÓW
+function sanitizeComment(str = '') {
+  const result = sanitizeHtml(String(str), {
+    // DOZWOLONE podstawowe tagi formatujące
+    allowedTags: ['b', 'i', 'em', 'strong', 'u', 'br', 'a', 'code', 'pre', 'p'],
+
+    // DOZWOLONE atrybuty (tylko bezpieczne)
+    allowedAttributes: {
+      a: ['href', 'title', 'target', 'rel'],
+    },
+
+    // SCHEMATY tylko http/https/mailto
+    allowedSchemes: ['http', 'https', 'mailto'],
+
+    // BLOKUJ niebezpieczne tagi
+    disallowedTagsMode: 'discard',
+
+    // ZABEZPIECZ linki - BLOKUJ javascript:
+    transformTags: {
+      a: (tagName, attribs) => {
+        // BLOKUJ linki z javascript: i inne niebezpieczne
+        if (
+          attribs.href &&
+          attribs.href.toLowerCase().startsWith('javascript:')
+        ) {
+          return { tagName: false, text: '' }; // USUŃ CAŁY TAG
+        }
+
+        // Bezpieczne linki - dodaj atrybuty zabezpieczające
+        return {
+          tagName: 'a',
+          attribs: {
+            ...attribs,
+            target: '_blank',
+            rel: 'noopener noreferrer nofollow ugc',
+          },
+        };
+      },
+    },
+
+    // DODATKOWO: Ręcznie blokuj niebezpieczne atrybuty
+    exclusiveFilter: (frame) => {
+      if (frame.attribs) {
+        // Blokuj atrybuty zdarzeń (onclick, onerror, etc.)
+        const dangerousAttrs = Object.keys(frame.attribs).filter(
+          (attr) => attr.startsWith('on') && attr.length > 2, // wszystkie on*
+        );
+
+        // Blokuj niebezpieczne schematy URL
+        const hasDangerousHref =
+          frame.attribs.href &&
+          frame.attribs.href.toLowerCase().startsWith('javascript:');
+
+        return dangerousAttrs.length > 0 || hasDangerousHref;
+      }
+      return false;
+    },
+  }).trim();
+
+  return result;
+}
+
+// BARDZO RESTRYKCYJNA SANITYZACJA - dla parametrów, query string, etc.
+const STRICT_SANITIZE_CONFIG = {
+  allowedTags: [],
+  allowedAttributes: {},
+  disallowedTagsMode: 'discard',
+};
+
+function sanitizeStrict(text) {
+  return sanitizeHtml(String(text || ''), STRICT_SANITIZE_CONFIG)
+    .trim()
+    .substring(0, 500);
+}
+
+module.exports = {
+  sanitizeTitle,
+  sanitizeBody,
+  sanitizeComment,
+  sanitizeStrict,
+};
+
+
+==================================
+utils\validate.js v.1
+==================================
+
+module.exports = function validateFields(fields) {
+    const errors = []
+    for (const [, [value, msg]] of Object.entries(fields)) {
+        if (typeof value === 'string' && value.trim() === '') {
+            errors.push(msg)
+        }
+        if (value === undefined || value === null) {
+            errors.push(msg)
+        }
+    }
+    return errors
+}

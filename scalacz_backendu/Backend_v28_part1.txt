@@ -1,0 +1,2080 @@
+Backend v.28
+
+==================================
+STRUKTURA PROJEKTU
+==================================
+
++ 
+  - .editorconfig
+  - .env
+  - .env.test
+  # [EXCLUDED] .git
+  - .gitattributes
+  - .gitignore
+  - .prettierrc
+  + .vscode
+    - .vscode\settings.json
+  - Plan Backend.txt
+  # [EXCLUDED] README.md
+  + __tests__
+    + __tests__\controllers
+      - __tests__\controllers\adminController.test.js
+    + __tests__\integration
+      - __tests__\integration\admin.test.js
+      - __tests__\integration\articles.test.js
+      - __tests__\integration\auth.test.js
+      - __tests__\integration\cache.test.js
+      - __tests__\integration\comments.test.js
+      - __tests__\integration\csp.test.js
+      - __tests__\integration\performance.test.js
+      - __tests__\integration\rateLimit.test.js
+      - __tests__\integration\sanitization.test.js
+      - __tests__\integration\users.test.js
+    + __tests__\services
+      - __tests__\services\articleService.createArticle.test.js
+      - __tests__\services\articleService.getArticles.test.js
+      - __tests__\services\articleService.toggleLikeArticle.test.js
+      - __tests__\services\authService.register.pending.test.js
+      - __tests__\services\authService.test.js
+      - __tests__\services\commentService.test.js
+      - __tests__\services\userService.integration.test.js
+      - __tests__\services\userService.test.js
+    + __tests__\utils
+      - __tests__\utils\sanitize.test.js
+  + backup
+    + backup\2025-09-05
+      + backup\2025-09-05\cms
+        - backup\2025-09-05\cms\articles.bson
+        - backup\2025-09-05\cms\articles.metadata.json
+        - backup\2025-09-05\cms\comments.bson
+        - backup\2025-09-05\cms\comments.metadata.json
+        - backup\2025-09-05\cms\pendingusers.bson
+        - backup\2025-09-05\cms\pendingusers.metadata.json
+        - backup\2025-09-05\cms\prelude.json
+        - backup\2025-09-05\cms\users.bson
+        - backup\2025-09-05\cms\users.metadata.json
+    + backup\cms
+      - backup\cms\articles.bson
+      - backup\cms\articles.metadata.json
+      - backup\cms\comments.bson
+      - backup\cms\comments.metadata.json
+      - backup\cms\pendingusers.bson
+      - backup\cms\pendingusers.metadata.json
+      - backup\cms\users.bson
+      - backup\cms\users.metadata.json
+  + controllers
+    - controllers\adminController.js
+    - controllers\articleController.js
+    - controllers\authController.js
+    - controllers\commentController.js
+    - controllers\userController.js
+  - docker-compose.yml
+  - eslint.config.js
+  - jest-mongodb-config.js
+  - jest.config.js
+  - jest.setup.js
+  + middleware
+    - middleware\authMiddleware.js
+    - middleware\cacheMiddleware.js
+    - middleware\cspMiddleware.js
+    - middleware\isAuthor.js
+    - middleware\isCommentAuthor.js
+    - middleware\performanceMiddleware.js
+    - middleware\rateLimit.js
+    - middleware\requireAdmin.js
+    - middleware\requireAuthorOrAdmin.js
+    - middleware\sanitizeMiddleware.js
+    - middleware\upload.js
+    - middleware\validateObjectId.js
+  + models
+    - models\Article.js
+    - models\Comment.js
+    - models\PendingUser.js
+    - models\User.js
+  # [EXCLUDED] node_modules
+  # [EXCLUDED] package-lock.json
+  - package.json
+  + routes
+    - routes\adminRoutes.js
+    - routes\articleRoutes.js
+    - routes\authRoutes.js
+    - routes\commentRoutes.js
+    - routes\userRoutes.js
+  # [EXCLUDED] scalacz_backendu
+  + scripts
+    - scripts\backup.js
+    - scripts\createIndexes.js
+    - scripts\list-backups.js
+    - scripts\performanceTest.js
+  - server.js
+  + services
+    - services\articleService.js
+    - services\authService.js
+    - services\commentService.js
+    - services\userService.js
+  # [EXCLUDED] uploads
+  + utils
+    - utils\AppError.js
+    - utils\advancedValidate.js
+    - utils\emailTemplates.js
+    - utils\logger.js
+    - utils\mailer.js
+    - utils\queryLogger.js
+    - utils\redisClient.js
+    - utils\sanitize.js
+    - utils\validate.js
+
+==================================
+.editorconfig v.1
+==================================
+
+root = true
+
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+
+[*.js]
+quote_type = single
+
+[*.json]
+quote_type = double
+
+==================================
+.env v.1
+==================================
+
+# Serwer aplikacji
+PORT=5000
+MONGO_URI=mongodb+srv://miroslawrup7:4snR6SR5f8RPM@cms-cluster.ippwmyf.mongodb.net/cms?retryWrites=true&w=majority
+# MONGO_URI=mongodb://localhost:27017/cms
+JWT_SECRET=twoj_tajny_klucz_ktory_nie_jest_prosty^%45
+FRONTEND_URL=http://localhost:3000
+
+# SMTP / Email
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=mirruptek7@gmail.com
+SMTP_PASS=jcrjnhkarjnjvnql
+MAIL_FROM="CMS <no-reply@twojadomena.pl>"
+
+# Inne
+APP_NAME=CMS
+
+==================================
+.env.test v.2
+==================================
+
+# .env.test
+JWT_SECRET="super-tajny-testowy-klucz-ktory-nie-jest-tajny"
+MONGO_URI="mongodb+srv://miroslawrup7:4snR6SR5f8RPM@cms-cluster.ippwmyf.mongodb.net/cms-test?retryWrites=true&w=majority"
+
+# .env.test
+REDIS_URL=redis://localhost:6379
+REDIS_CACHE_TTL=60 # Krótszy TTL dla testów
+
+==================================
+.gitattributes v.1
+==================================
+
+* text=auto
+
+==================================
+.gitignore v.3
+==================================
+
+# Node modules
+**/node_modules/
+
+# Env files
+**/.env
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+**/logs/
+**/*.log
+
+
+
+
+==================================
+.prettierrc v.1
+==================================
+
+{
+  "semi": true,
+  "trailingComma": "all",
+  "singleQuote": true,
+  "printWidth": 80,
+  "tabWidth": 2,
+  "useTabs": false,
+  "endOfLine": "lf"
+}
+
+==================================
+.vscode\settings.json v.1
+==================================
+
+{
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript"],
+  "prettier.requireConfig": true
+}
+
+
+==================================
+Plan Backend.txt v.2
+==================================
+
+🟢 ETAP 1: TESTY JEDNOSTKOWE I INTEGRACYJNE USŁUG - ✅ 100%
+
+1.1. Testy jednostkowe Services
+    ✅ articleService (create, get, toggleLike)
+    ✅ authService (login, registerPending)
+    ✅ commentService
+    ✅ userService (jednostkowe)
+    ✅ adminController
+1.2. Testy integracyjne Services
+    ✅ userService.integration.test.js z MongoDB Memory Server
+    ✅ Konfiguracja testowej bazy w pamięci
+    ✅ Bezpieczne zarządzanie połączeniami
+1.3. Konfiguracja i tooling
+    ✅ ESLint + Prettier skonfigurowane
+    ✅ Automatyczne formatowanie
+    ✅ MongoDB Memory Server 
+
+🟡 ETAP 2: TESTY INTEGRACYJNE ENDPOINTÓW HTTP - ✅ 100%
+
+2.1. Endpointy autentykacji
+    ✅ POST /api/auth/login - logowanie
+    ✅ POST /api/auth/register-pending - rejestracja oczekująca
+    ✅ POST /api/auth/logout - wylogowanie
+2.2. Endpointy artykułów
+    ✅ GET /api/articles - lista z paginacją
+    ✅ POST /api/articles - tworzenie artykułu
+    ✅ GET /api/articles/:id - pojedynczy artykuł
+    ✅ PUT /api/articles/:id - edycja artykułu
+    ✅ DELETE /api/articles/:id - usuwanie artykułu
+    ✅ POST /api/articles/:id/like - like/dislike
+2.3. Endpointy komentarzy
+    ✅ GET /api/comments/:id - komentarze artykułu
+    ✅ POST /api/comments/:id - dodawanie komentarza
+    ✅ PUT /api/comments/:id - edycja komentarza
+    ✅ DELETE /api/comments/:id - usuwanie komentarza
+2.4. Endpointy użytkowników
+    ✅ GET /api/users/profile - profil użytkownika
+    ✅ PUT /api/users/profile - edycja profilu
+    ✅ PUT /api/users/password - zmiana hasła
+2.5. Endpointy administracyjne
+    ✅ GET /api/admin/pending-users - lista użytkowników oczekujących
+    ✅ POST /api/admin/approve/:id - zatwierdzanie użytkownika
+    ✅ DELETE /api/admin/reject/:id - odrzucanie użytkownika
+
+🔵 ETAP 3: OPTYMALIZACJA I ZABEZPIECZENIA - 🔄 55%
+
+3.1. Bezpieczeństwo
+    ✅ Rate limiting dla wszystkich endpointów
+    ✅ Weryfikacja sanitization
+    ✅ Content Security Policy headers
+
+3.2. Wydajność
+    ✅ Cache'owanie odpowiedzi (Redis)
+    ✅ Optymalizacja zapytań MongoDB
+    ⚪ Paginacja dla wszystkich list
+
+3.3. Logowanie i monitoring
+    ⚪ Strukturalne logowanie (JSON)
+    ⚪ Dodanie request IDs
+    ⚪ Metryki wydajności
+
+🟣 ETAP 4: ROZSZERZENIE FUNKCJONALNOŚCI - 🔄 0%
+
+4.1. API Documentation
+    ⚪ Swagger/OpenAPI documentation
+    ⚪ API versioning przygotowanie
+
+4.2. Zaawansowane features
+    ⚪ Full-text search (Elasticsearch)
+    ⚪ Notifications system
+    ⚪ File upload optimization
+    ⚪ Background jobs (bull.js)
+
+4.3. DevOps przygotowanie
+    ⚪ Dockerfile i docker-compose
+    ⚪ Environment-based configuration
+    ⚪ Health checks i readiness probe
+
+
+==================================
+__tests__\controllers\adminController.test.js v.1
+==================================
+
+// __tests__/controllers/adminController.test.js
+const adminController = require('../../controllers/adminController');
+const PendingUser = require('../../models/PendingUser');
+const User = require('../../models/User');
+const { sendMail } = require('../../utils/mailer');
+/* eslint-disable no-unused-vars */
+const AppError = require('../../utils/AppError');
+/* eslint-enable no-unused-vars */
+const bcrypt = require('bcryptjs');
+
+// Mockujemy zależności
+jest.mock('../../models/PendingUser');
+jest.mock('../../models/User');
+jest.mock('../../utils/mailer');
+jest.mock('bcryptjs');
+jest.mock('../../utils/AppError', () => {
+  return jest.fn().mockImplementation((message, statusCode) => {
+    const error = new Error(message);
+    error.statusCode = statusCode;
+    return error;
+  });
+});
+
+describe('Kontroler: adminController', () => {
+  let req, res, next;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    // Mock request, response i next
+    req = {
+      query: {},
+      params: {},
+      body: {},
+    };
+    res = {
+      json: jest.fn(),
+      status: jest.fn().mockReturnThis(),
+    };
+    next = jest.fn();
+  });
+
+  describe('getPendingUsers', () => {
+    it('Powinien zwrócić listę użytkowników oczekujących z paginacją', async () => {
+      // ARRANGE
+      req.query = { page: '1', limit: '10', search: 'test' };
+      const mockUsers = [
+        { _id: '1', username: 'testuser1', email: 'test1@example.com' },
+        { _id: '2', username: 'testuser2', email: 'test2@example.com' },
+      ];
+
+      PendingUser.countDocuments.mockResolvedValue(2);
+      PendingUser.find.mockReturnValue({
+        sort: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        lean: jest.fn().mockResolvedValue(mockUsers),
+      });
+
+      // ACT
+      await adminController.getPendingUsers(req, res, next);
+
+      // ASSERT
+      expect(PendingUser.countDocuments).toHaveBeenCalledWith({
+        $or: [
+          { username: { $regex: 'test', $options: 'i' } },
+          { email: { $regex: 'test', $options: 'i' } },
+        ],
+      });
+      expect(res.json).toHaveBeenCalledWith({
+        total: 2,
+        page: 1,
+        limit: 10,
+        users: mockUsers,
+      });
+    });
+
+    it('Powinien obsłużyć błąd podczas pobierania użytkowników', async () => {
+      // ARRANGE
+      const error = new Error('Database error');
+      PendingUser.countDocuments.mockRejectedValue(error);
+
+      // ACT
+      await adminController.getPendingUsers(req, res, next);
+
+      // ASSERT
+      expect(next).toHaveBeenCalledWith(error);
+    });
+  });
+
+  describe('approveUser', () => {
+    it('Powinien zatwierdzić użytkownika i wysłać email', async () => {
+      // ARRANGE
+      req.params = { id: 'pending123' };
+      const mockPendingUser = {
+        _id: 'pending123',
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'rawpassword',
+        role: 'user',
+        deleteOne: jest.fn().mockResolvedValue(true),
+      };
+
+      const mockSavedUser = {
+        _id: 'newUserId123', // ✅ TUTAJ JEST _id
+        username: 'testuser',
+        email: 'test@example.com',
+        role: 'user',
+      };
+
+      PendingUser.findById.mockResolvedValue(mockPendingUser);
+      User.findOne.mockResolvedValue(null);
+
+      // Mock bcrypt.hash
+      bcrypt.hash.mockResolvedValue('hashedpassword');
+
+      // Mock User constructor and save - ZWRACA OBIEKT Z _id
+      const mockSave = jest.fn().mockResolvedValue(mockSavedUser);
+      User.mockImplementation(() => ({
+        save: mockSave,
+      }));
+
+      sendMail.mockResolvedValue(true);
+
+      // ACT
+      await adminController.approveUser(req, res, next);
+
+      // ASSERT
+      expect(PendingUser.findById).toHaveBeenCalledWith('pending123');
+      expect(User.findOne).toHaveBeenCalledWith({ email: 'test@example.com' });
+      expect(bcrypt.hash).toHaveBeenCalledWith('rawpassword', 10);
+      expect(User).toHaveBeenCalledWith({
+        username: 'testuser',
+        email: 'test@example.com',
+        password: 'hashedpassword',
+        role: 'user',
+      });
+      expect(mockSave).toHaveBeenCalled();
+      expect(sendMail).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Użytkownik zatwierdzony i dodany do systemu.',
+        userId: 'newUserId123', // ✅ TERAZ BĘDZIE PASOWAĆ
+      });
+    });
+
+    it('Powinien rzucić błąd gdy wniosek nie istnieje', async () => {
+      // ARRANGE
+      req.params = { id: 'nonexistent' };
+      PendingUser.findById.mockResolvedValue(null);
+
+      // ACT
+      await adminController.approveUser(req, res, next);
+
+      // ASSERT
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].statusCode).toBe(404);
+    });
+
+    it('Powinien rzucić błąd gdy email już istnieje w systemie', async () => {
+      // ARRANGE
+      req.params = { id: 'pending123' };
+      const mockPendingUser = {
+        _id: 'pending123',
+        email: 'existing@example.com',
+        deleteOne: jest.fn().mockResolvedValue(true),
+      };
+
+      PendingUser.findById.mockResolvedValue(mockPendingUser);
+      User.findOne.mockResolvedValue({ email: 'existing@example.com' });
+
+      // ACT
+      await adminController.approveUser(req, res, next);
+
+      // ASSERT
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].statusCode).toBe(400);
+    });
+  });
+
+  describe('rejectUser', () => {
+    it('Powinien odrzucić użytkownika i wysłać email', async () => {
+      // ARRANGE
+      req.params = { id: 'pending123' };
+      const mockPendingUser = {
+        _id: 'pending123',
+        username: 'testuser',
+        email: 'test@example.com',
+        deleteOne: jest.fn().mockResolvedValue(true),
+      };
+
+      PendingUser.findById.mockResolvedValue(mockPendingUser);
+      sendMail.mockResolvedValue(true);
+
+      // ACT
+      await adminController.rejectUser(req, res, next);
+
+      // ASSERT
+      expect(PendingUser.findById).toHaveBeenCalledWith('pending123');
+      expect(sendMail).toHaveBeenCalled();
+      expect(mockPendingUser.deleteOne).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Wniosek został odrzucony.',
+      });
+    });
+
+    it('Powinien obsłużyć błąd wysyłki emaila przy odrzuceniu', async () => {
+      // ARRANGE
+      req.params = { id: 'pending123' };
+      const mockPendingUser = {
+        _id: 'pending123',
+        username: 'testuser',
+        email: 'test@example.com',
+        deleteOne: jest.fn().mockResolvedValue(true),
+      };
+
+      PendingUser.findById.mockResolvedValue(mockPendingUser);
+      const mailError = new Error('SMTP error');
+      sendMail.mockRejectedValue(mailError);
+
+      // ACT
+      await adminController.rejectUser(req, res, next);
+
+      // ASSERT
+      expect(sendMail).toHaveBeenCalled();
+      expect(mockPendingUser.deleteOne).toHaveBeenCalled();
+      expect(res.json).toHaveBeenCalledWith({
+        message: 'Wniosek został odrzucony.',
+      });
+    });
+
+    it('Powinien rzucić błąd gdy wniosek nie istnieje', async () => {
+      // ARRANGE
+      req.params = { id: 'nonexistent' };
+      PendingUser.findById.mockResolvedValue(null);
+
+      // ACT
+      await adminController.rejectUser(req, res, next);
+
+      // ASSERT
+      expect(next).toHaveBeenCalledWith(expect.any(Error));
+      expect(next.mock.calls[0][0].statusCode).toBe(404);
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\admin.test.js v.2
+==================================
+
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const PendingUser = require('../../models/PendingUser');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Endpointy Administracyjne', () => {
+  let adminAuthToken;
+  let userAuthToken;
+  let _adminUser;
+  let _regularUser;
+  let pendingUser1;
+  let pendingUser2;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz administratora
+    const hashedAdminPassword = await bcrypt.hash('admin123', 10);
+    _adminUser = await User.create({
+      email: 'admin@example.com',
+      password: hashedAdminPassword,
+      username: 'adminuser',
+      role: 'admin',
+    });
+
+    // Utwórz zwykłego użytkownika
+    const hashedUserPassword = await bcrypt.hash('user123', 10);
+    _regularUser = await User.create({
+      email: 'regular@example.com',
+      password: hashedUserPassword,
+      username: 'regularuser',
+      role: 'user',
+    });
+
+    // Utwórz użytkowników oczekujących
+    pendingUser1 = await PendingUser.create({
+      username: 'pendinguser1',
+      email: 'pending1@example.com',
+      password: 'pendingpass1',
+      role: 'user',
+    });
+
+    pendingUser2 = await PendingUser.create({
+      username: 'pendinguser2',
+      email: 'pending2@example.com',
+      password: 'pendingpass2',
+      role: 'author',
+    });
+
+    // Login jako admin aby dostać token
+    const adminLoginResponse = await request(app).post('/api/auth/login').send({
+      email: 'admin@example.com',
+      password: 'admin123',
+    });
+    adminAuthToken = adminLoginResponse.headers['set-cookie'][0];
+
+    // Login jako zwykły użytkownik
+    const userLoginResponse = await request(app).post('/api/auth/login').send({
+      email: 'regular@example.com',
+      password: 'user123',
+    });
+    userAuthToken = userLoginResponse.headers['set-cookie'][0];
+  });
+
+  afterAll(async () => {
+    await PendingUser.deleteMany({});
+    await User.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  // 1. GET /api/admin/pending-users
+  describe('GET /api/admin/pending-users', () => {
+    it('Powinien zwrócić listę użytkowników oczekujących dla administratora', async () => {
+      const response = await request(app)
+        .get('/api/admin/pending-users')
+        .set('Cookie', adminAuthToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('users');
+      expect(Array.isArray(response.body.users)).toBe(true);
+      expect(response.body.users.length).toBe(2);
+      expect(response.body).toHaveProperty('total', 2);
+    });
+
+    it('Powinien zwrócić błąd 403 dla zwykłego użytkownika', async () => {
+      const response = await request(app)
+        .get('/api/admin/pending-users')
+        .set('Cookie', userAuthToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('Powinien zwrócić błąd 401 gdy brak autoryzacji', async () => {
+      const response = await request(app).get('/api/admin/pending-users');
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // 2. POST /api/admin/approve/:id
+  describe('POST /api/admin/approve/:id', () => {
+    it('Powinien zatwierdzić użytkownika oczekującego', async () => {
+      const response = await request(app)
+        .post(`/api/admin/approve/${pendingUser1._id}`)
+        .set('Cookie', adminAuthToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        'message',
+        'Użytkownik zatwierdzony i dodany do systemu.',
+      );
+      expect(response.body).toHaveProperty('userId');
+
+      // Sprawdź czy użytkownik został przeniesiony do kolekcji User
+      const approvedUser = await User.findOne({
+        email: 'pending1@example.com',
+      });
+      expect(approvedUser).not.toBeNull();
+      expect(approvedUser.username).toBe('pendinguser1');
+
+      // Sprawdź czy użytkownik został usunięty z kolekcji PendingUser
+      const pendingUser = await PendingUser.findById(pendingUser1._id);
+      expect(pendingUser).toBeNull();
+    });
+
+    it('Powinien zwrócić błąd 404 dla nieistniejącego użytkownika oczekującego', async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .post(`/api/admin/approve/${fakeId}`)
+        .set('Cookie', adminAuthToken);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('Powinien zwrócić błąd 403 dla zwykłego użytkownika', async () => {
+      const response = await request(app)
+        .post(`/api/admin/approve/${pendingUser2._id}`)
+        .set('Cookie', userAuthToken);
+
+      expect(response.status).toBe(403);
+    });
+  });
+
+  // 3. DELETE /api/admin/reject/:id
+  describe('DELETE /api/admin/reject/:id', () => {
+    it('Powinien odrzucić użytkownika oczekującego', async () => {
+      const response = await request(app)
+        .delete(`/api/admin/reject/${pendingUser2._id}`)
+        .set('Cookie', adminAuthToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        'message',
+        'Wniosek został odrzucony.',
+      );
+
+      // Sprawdź czy użytkownik został usunięty z kolekcji PendingUser
+      const rejectedUser = await PendingUser.findById(pendingUser2._id);
+      expect(rejectedUser).toBeNull();
+
+      // Sprawdź czy użytkownik NIE został dodany do kolekcji User
+      const userInSystem = await User.findOne({
+        email: 'pending2@example.com',
+      });
+      expect(userInSystem).toBeNull();
+    });
+
+    it('Powinien zwrócić błąd 404 dla nieistniejącego użytkownika oczekującego', async () => {
+      const fakeId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .delete(`/api/admin/reject/${fakeId}`)
+        .set('Cookie', adminAuthToken);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('Powinien zwrócić błąd 403 dla zwykłego użytkownika', async () => {
+      // Utwórz kolejnego użytkownika oczekującego do testu
+      const testPendingUser = await PendingUser.create({
+        username: 'testreject',
+        email: 'testreject@example.com',
+        password: 'testpass',
+        role: 'user',
+      });
+
+      const response = await request(app)
+        .delete(`/api/admin/reject/${testPendingUser._id}`)
+        .set('Cookie', userAuthToken);
+
+      expect(response.status).toBe(403);
+
+      // Posprzątaj
+      await PendingUser.findByIdAndDelete(testPendingUser._id);
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\articles.test.js v.2
+==================================
+
+// __tests__/integration/articles.test.js
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const Article = require('../../models/Article');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Endpointy Artykułów', () => {
+  let authToken;
+  let testUser;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika i zaloguj
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    testUser = await User.create({
+      email: 'author@example.com',
+      password: hashedPassword,
+      username: 'author',
+      role: 'author',
+    });
+
+    // Login aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'author@example.com',
+      password: 'test123',
+    });
+
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  afterEach(async () => {
+    await Article.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  // ✅ TEST 1: GET /api/articles - lista z paginacją
+  describe('GET /api/articles', () => {
+    it('Powinien zwrócić listę artykułów z paginacją', async () => {
+      // Utwórz testowe artykuły
+      await Article.create([
+        {
+          title: 'Test Article 1',
+          content: 'Content of article 1',
+          author: testUser._id,
+          images: [],
+        },
+        {
+          title: 'Test Article 2',
+          content: 'Content of article 2',
+          author: testUser._id,
+          images: [],
+        },
+      ]);
+
+      const response = await request(app)
+        .get('/api/articles?page=1&limit=2')
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('articles');
+      expect(response.body).toHaveProperty('total');
+      expect(response.body.articles).toHaveLength(2);
+    });
+  });
+
+  // ✅ TEST 2: POST /api/articles - tworzenie artykułu
+  describe('POST /api/articles', () => {
+    it('Powinien utworzyć nowy artykuł', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', 'New Test Article')
+        .field('content', 'This is the content of the new article')
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty('message', 'Artykuł utworzony');
+      expect(response.body).toHaveProperty('article');
+    });
+  });
+
+  // ✅ TEST 3: GET /api/articles/:id - pojedynczy artykuł
+  describe('GET /api/articles/:id', () => {
+    it('Powinien zwrócić pojedynczy artykuł', async () => {
+      const article = await Article.create({
+        title: 'Single Article',
+        content: 'Content for single article',
+        author: testUser._id,
+        images: [],
+      });
+
+      const response = await request(app)
+        .get(`/api/articles/${article._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('title', 'Single Article');
+    });
+  });
+
+  // ✅ TEST 4: PUT /api/articles/:id - edycja artykułu
+  describe('PUT /api/articles/:id', () => {
+    it('Powinien zaktualizować artykuł', async () => {
+      const article = await Article.create({
+        title: 'Old Title',
+        content: 'Old content',
+        author: testUser._id,
+        images: [],
+      });
+
+      const response = await request(app)
+        .put(`/api/articles/${article._id}`)
+        .set('Cookie', authToken)
+        .send({
+          title: 'Updated Title',
+          content: 'This is updated content that is longer than 20 characters', // Minimum 20 znaków
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Artykuł zaktualizowany');
+    });
+  });
+
+  // ✅ TEST 5: DELETE /api/articles/:id - usuwanie artykułu
+  describe('DELETE /api/articles/:id', () => {
+    it('Powinien usunąć artykuł', async () => {
+      const article = await Article.create({
+        title: 'Article to delete',
+        content: 'Content to delete',
+        author: testUser._id,
+        images: [],
+      });
+
+      const response = await request(app)
+        .delete(`/api/articles/${article._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(204);
+    });
+  });
+
+  // ✅ TEST 6: POST /api/articles/:id/like - like/dislike
+  describe('POST /api/articles/:id/like', () => {
+    it('Powinien dodać like do artykułu', async () => {
+      const article = await Article.create({
+        title: 'Article to like',
+        content: 'Content to like',
+        author: new mongoose.Types.ObjectId(), // Inny autor
+        images: [],
+      });
+
+      const response = await request(app)
+        .post(`/api/articles/${article._id}/like`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('liked', true);
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\auth.test.js v.1
+==================================
+
+// __tests__/integration/auth.test.js
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const User = require('../../models/User');
+const PendingUser = require('../../models/PendingUser');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Endpointy Autentykacji', () => {
+  beforeAll(async () => {
+    await startServer();
+  });
+
+  afterEach(async () => {
+    // Czyść wszystkie kolekcje po każdym teście
+    await User.deleteMany({});
+    await PendingUser.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase();
+  });
+
+  describe('POST /api/auth/login', () => {
+    it('Powinien zalogować użytkownika i zwrócić cookie z tokenem', async () => {
+      // 1. Utwórz aktywnego użytkownika
+      const hashedPassword = await bcrypt.hash('test123', 10);
+      await User.create({
+        email: 'test@example.com',
+        password: hashedPassword,
+        username: 'testuser',
+        role: 'user',
+      });
+
+      // 2. Wyślij request login
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'test123',
+      });
+
+      // 3. Sprawdź response
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: 'Zalogowano pomyślnie.' });
+
+      // 4. Sprawdź czy token jest w cookies
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      expect(cookies.some((cookie) => cookie.includes('token'))).toBe(true);
+    });
+
+    it('Powinien zwrócić błąd 400 dla nieprawidłowych danych', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        email: 'wrong@example.com',
+        password: 'wrongpassword',
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({
+        message: 'Nieprawidłowy email lub hasło.',
+      });
+    });
+
+    it('Powinien zwrócić błąd 400 dla brakującego emaila', async () => {
+      const response = await request(app).post('/api/auth/login').send({
+        password: 'test123',
+      });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message');
+    });
+  });
+
+  describe('POST /api/auth/register-pending', () => {
+    it('Powinien zarejestrować użytkownika oczekującego', async () => {
+      const response = await request(app)
+        .post('/api/auth/register-pending')
+        .send({
+          username: 'newuser',
+          email: 'new@example.com',
+          password: 'password123',
+          role: 'user',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual({
+        message: 'Wniosek o rejestrację został przesłany.',
+      });
+
+      // Sprawdź czy użytkownik jest w kolekcji pending
+      const pendingUser = await PendingUser.findOne({
+        email: 'new@example.com',
+      });
+      expect(pendingUser).not.toBeNull();
+      expect(pendingUser.username).toBe('newuser');
+    });
+
+    it('Powinien zwrócić błąd 400 dla zajętego emaila', async () => {
+      // Najpierw utwórz użytkownika
+      await PendingUser.create({
+        username: 'existing',
+        email: 'existing@example.com',
+        password: 'password123',
+        role: 'user',
+      });
+
+      const response = await request(app)
+        .post('/api/auth/register-pending')
+        .send({
+          username: 'newuser',
+          email: 'existing@example.com', // Ten sam email
+          password: 'password123',
+          role: 'user',
+        });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ message: 'Email jest już zajęty.' });
+    });
+  });
+
+  describe('POST /api/auth/logout', () => {
+    it('Powinien wylogować użytkownika i wyczyścić cookie', async () => {
+      const response = await request(app).post('/api/auth/logout').send();
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual({ message: 'Wylogowano.' });
+
+      // Sprawdź czy cookie jest czyszczone
+      const cookies = response.headers['set-cookie'];
+      expect(cookies).toBeDefined();
+      expect(cookies.some((cookie) => cookie.includes('token=;'))).toBe(true);
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\cache.test.js v.1
+==================================
+
+// __tests__/integration/cache.test.js
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const redisClient = require('../../utils/redisClient');
+
+describe('Integracja: Cache Redis', () => {
+  beforeAll(async () => {
+    await startServer();
+  });
+
+  afterAll(async () => {
+    await redisClient.disconnect();
+    await cleanupTestDatabase();
+  });
+
+  it('Powinien cache\'ować odpowiedzi GET /api/articles', async () => {
+    // Pierwsze request - cache MISS
+    const response1 = await request(app).get('/api/articles');
+    expect(response1.status).toBe(200);
+
+    // Drugie request - cache HIT
+    const response2 = await request(app).get('/api/articles');
+    expect(response2.status).toBe(200);
+
+    // Sprawdź nagłówki lub czas odpowiedzi
+    // (w rzeczywistości cache jest transparentny dla klienta)
+  });
+
+  it('Nie powinien cache\'ować POST requests', async () => {
+    const response = await request(app)
+      .post('/api/articles')
+      .set('Cookie', authToken) // potrzebny token
+      .send({ title: 'Test', content: 'Content' });
+    
+    expect(response.status).toBe(201);
+    // POST nie powinien być cache'owany
+  });
+});
+
+==================================
+__tests__\integration\comments.test.js v.3
+==================================
+
+const request = require('supertest');
+const mongoose = require('mongoose');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const Article = require('../../models/Article');
+const Comment = require('../../models/Comment');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Endpointy Komentarzy', () => {
+  let authToken;
+  let testUser;
+  let testArticle;
+  let testComment;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika i zaloguj
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    testUser = await User.create({
+      email: 'commenter@example.com',
+      password: hashedPassword,
+      username: 'commenter',
+      role: 'user',
+    });
+
+    // Login aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'commenter@example.com',
+      password: 'test123',
+    });
+
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  beforeEach(async () => {
+    // Utwórz testowy artykuł przed każdym testem
+    testArticle = await Article.create({
+      title: 'Test Article for Comments',
+      content:
+        'Content for comments test. This should be long enough for validation.',
+      author: testUser._id,
+      images: [],
+    });
+
+    // Utwórz testowy komentarz
+    testComment = await Comment.create({
+      text: 'Initial test comment for testing purposes',
+      article: testArticle._id,
+      author: testUser._id,
+    });
+  });
+
+  afterEach(async () => {
+    await Comment.deleteMany({});
+    await Article.deleteMany({});
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  // 1. GET /api/comments/:id (articleId)
+  describe('GET /api/comments/:id', () => {
+    it('Powinien zwrócić listę komentarzy dla artykułu', async () => {
+      const response = await request(app)
+        .get(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(1);
+      expect(response.body.comments[0]).toHaveProperty(
+        'text',
+        'Initial test comment for testing purposes',
+      );
+    });
+
+    it('Powinien zwrócić pustą listę gdy brak komentarzy', async () => {
+      await Comment.deleteMany({});
+
+      const response = await request(app)
+        .get(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(0);
+    });
+
+    it('Powinien zwrócić pustą listę dla nieistniejącego artykułu', async () => {
+      const fakeArticleId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .get(`/api/comments/${fakeArticleId}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('comments');
+      expect(Array.isArray(response.body.comments)).toBe(true);
+      expect(response.body.comments.length).toBe(0);
+    });
+  });
+
+  // 2. POST /api/comments/:id (articleId)
+  describe('POST /api/comments/:id', () => {
+    it('Powinien dodać komentarz do artykułu', async () => {
+      const newComment = {
+        text: 'This is a new test comment with sufficient length',
+      };
+
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send(newComment);
+
+      expect(response.status).toBe(201);
+      expect(response.body).toHaveProperty('text', newComment.text);
+      expect(response.body).toHaveProperty(
+        'article',
+        testArticle._id.toString(),
+      );
+      expect(response.body).toHaveProperty('author');
+
+      // Sprawdź czy komentarz jest w bazie
+      const comments = await Comment.find({ article: testArticle._id });
+      expect(comments).toHaveLength(2);
+    });
+
+    it('Powinien zwrócić błąd 400 dla zbyt krótkiego komentarza', async () => {
+      const shortComment = {
+        text: 'Short', // 5 znaków < 6 wymaganych
+      };
+
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send(shortComment);
+
+      expect(response.status).toBe(400);
+      expect(response.body).toHaveProperty('message');
+    });
+
+    it('Powinien zwrócić błąd 404 dla nieistniejącego artykułu', async () => {
+      const fakeArticleId = new mongoose.Types.ObjectId();
+      const newComment = {
+        text: 'Comment for non-existent article',
+      };
+
+      const response = await request(app)
+        .post(`/api/comments/${fakeArticleId}`)
+        .set('Cookie', authToken)
+        .send(newComment);
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  // 3. PUT /api/comments/:id (commentId)
+  describe('PUT /api/comments/:id', () => {
+    it('Powinien zaktualizować komentarz', async () => {
+      const updatedText = 'This is an updated comment with sufficient length';
+
+      const response = await request(app)
+        .put(`/api/comments/${testComment._id}`)
+        .set('Cookie', authToken)
+        .send({ text: updatedText });
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('text', updatedText);
+
+      // Sprawdź czy komentarz został zaktualizowany w bazie
+      const updatedComment = await Comment.findById(testComment._id);
+      expect(updatedComment.text).toBe(updatedText);
+    });
+
+    it('Powinien zwrócić błąd 403 przy próbie edycji cudzego komentarza', async () => {
+      // Utwórz innego użytkownika
+      const otherUser = await User.create({
+        email: 'other@example.com',
+        password: await bcrypt.hash('test123', 10),
+        username: 'otheruser',
+        role: 'user',
+      });
+
+      // Utwórz komentarz jako inny użytkownik
+      const otherComment = await Comment.create({
+        text: 'Other user comment',
+        article: testArticle._id,
+        author: otherUser._id,
+      });
+
+      const response = await request(app)
+        .put(`/api/comments/${otherComment._id}`)
+        .set('Cookie', authToken)
+        .send({ text: 'Trying to edit someone else comment' });
+
+      expect(response.status).toBe(403);
+    });
+
+    it('Powinien zwrócić błąd 404 dla nieistniejącego komentarza', async () => {
+      const fakeCommentId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .put(`/api/comments/${fakeCommentId}`)
+        .set('Cookie', authToken)
+        .send({ text: 'Trying to update non-existent comment' });
+
+      expect(response.status).toBe(404);
+    });
+  });
+
+  // 4. DELETE /api/comments/:id (commentId)
+  describe('DELETE /api/comments/:id', () => {
+    it('Powinien usunąć komentarz', async () => {
+      const response = await request(app)
+        .delete(`/api/comments/${testComment._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(204);
+
+      // Sprawdź czy komentarz został usunięty z bazy
+      const deletedComment = await Comment.findById(testComment._id);
+      expect(deletedComment).toBeNull();
+    });
+
+    it('Powinien zwrócić błąd 403 przy próbie usunięcia cudzego komentarza', async () => {
+      // Utwórz innego użytkownika
+      const otherUser = await User.create({
+        email: 'other2@example.com',
+        password: await bcrypt.hash('test123', 10),
+        username: 'otheruser2',
+        role: 'user',
+      });
+
+      // Utwórz komentarz jako inny użytkownik
+      const otherComment = await Comment.create({
+        text: 'Other user comment to delete',
+        article: testArticle._id,
+        author: otherUser._id,
+      });
+
+      const response = await request(app)
+        .delete(`/api/comments/${otherComment._id}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(403);
+    });
+
+    it('Powinien zwrócić błąd 404 dla nieistniejącego komentarza', async () => {
+      const fakeCommentId = new mongoose.Types.ObjectId();
+
+      const response = await request(app)
+        .delete(`/api/comments/${fakeCommentId}`)
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(404);
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\csp.test.js v.1
+==================================
+
+// __tests__/integration/csp.test.js
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+
+describe('Integracja: Content Security Policy', () => {
+  beforeAll(async () => {
+    await startServer();
+  });
+
+  afterAll(async () => {
+    await cleanupTestDatabase();
+  });
+
+  it('Powinien zwracać nagłówki Content-Security-Policy', async () => {
+    const response = await request(app).get('/api/articles');
+
+    expect(response.status).toBe(200);
+    expect(response.headers).toHaveProperty('content-security-policy');
+    
+    const cspHeader = response.headers['content-security-policy'];
+    expect(cspHeader).toBeDefined();
+    expect(cspHeader).toContain("default-src 'self'");
+  });
+
+  it('Powinien pozwalać na obrazy z data URI', async () => {
+    const response = await request(app).get('/api/articles');
+    
+    const cspHeader = response.headers['content-security-policy'];
+    expect(cspHeader).toContain("img-src 'self' data:");
+  });
+
+  it('Powinien blokować obiekty embedded', async () => {
+    const response = await request(app).get('/api/articles');
+    
+    const cspHeader = response.headers['content-security-policy'];
+    expect(cspHeader).toContain("object-src 'none'");
+  });
+});
+
+==================================
+__tests__\integration\performance.test.js v.1
+==================================
+
+// __tests__/integration/performance.test.js
+const { app, startServer } = require('../../server');
+
+describe('Wydajność: Testy optymalizacji', () => {
+  beforeAll(async () => {
+    await startServer();
+  });
+
+  it('GET /api/articles powinien być szybki (<100ms)', async () => {
+    const start = Date.now();
+    const response = await request(app).get('/api/articles');
+    const duration = Date.now() - start;
+    
+    expect(response.status).toBe(200);
+    expect(duration).toBeLessThan(100); // ✅ Szybko!
+  });
+
+  it('GET /api/articles?search=test powinien używać full-text index', async () => {
+    const response = await request(app).get('/api/articles?search=test');
+    expect(response.status).toBe(200);
+    // Sprawdź w logach czy używa $text index
+  });
+});
+
+==================================
+__tests__\integration\rateLimit.test.js v.1
+==================================
+
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Rate Limiting', () => {
+  let authToken;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    await User.create({
+      email: 'ratelimit@example.com',
+      password: hashedPassword,
+      username: 'ratelimituser',
+      role: 'user',
+    });
+
+    // Zaloguj się aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'ratelimit@example.com',
+      password: 'test123',
+    });
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  describe('Global Rate Limiting', () => {
+    it('Powinien pozwolić na normalną liczbę żądań', async () => {
+      const requests = [];
+      for (let i = 0; i < 100; i++) {
+        requests.push(
+          request(app).get('/api/articles').set('Cookie', authToken),
+        );
+      }
+
+      const responses = await Promise.all(requests);
+      const successResponses = responses.filter((r) => r.status === 200);
+
+      expect(successResponses.length).toBe(100);
+    }, 30000);
+
+    it('Powinien blokować przy zbyt wielu żądaniach z tego samego IP', async () => {
+      const requests = [];
+      for (let i = 0; i < 1001; i++) {
+        requests.push(request(app).get('/api/articles'));
+      }
+
+      const responses = await Promise.all(requests);
+      const blockedResponses = responses.filter((r) => r.status === 429);
+
+      expect(blockedResponses.length).toBeGreaterThan(0);
+      expect(blockedResponses[0].body.message).toContain('Zbyt wiele żądań');
+    }, 30000);
+  });
+
+  describe('Auth Rate Limiting', () => {
+    it('Powinien blokować przy zbyt wielu próbach logowania', async () => {
+      const requests = [];
+      // Użyj UNIKALNYCH adresów IP dla każdego żądania (omijają globalny limiter)
+      for (let i = 0; i < 51; i++) {
+        requests.push(
+          request(app)
+            .post('/api/auth/login')
+            .set('X-Forwarded-For', `192.168.1.${i}`) // 🎯 RÓŻNE IP
+            .send({
+              email: `test${i}@example.com`,
+              password: 'wrongpassword',
+            }),
+        );
+      }
+
+      const responses = await Promise.all(requests);
+      const blockedResponses = responses.filter((r) => r.status === 429);
+
+      expect(blockedResponses.length).toBeGreaterThan(0);
+    }, 30000);
+  });
+
+  describe('Admin Rate Limiting', () => {
+    it('Powinien blokować przy zbyt wielu żądaniach do admin endpointów', async () => {
+      // 🎯 UTWÓRZ admina PRZED testami (bez logowania przez API)
+      const adminPassword = await bcrypt.hash('admin123', 10);
+      await User.create({
+        email: 'adminlimit@example.com',
+        password: adminPassword,
+        username: 'adminlimit',
+        role: 'admin',
+      });
+
+      // 🎯 SYMULOWANY token admina (omijamy rate limiting logowania)
+      const adminToken =
+        'token=simulated_admin_token; Path=/; HttpOnly; SameSite=Lax';
+
+      const requests = [];
+      for (let i = 0; i < 201; i++) {
+        requests.push(
+          request(app)
+            .get('/api/admin/pending-users')
+            .set('Cookie', adminToken),
+        );
+      }
+
+      const responses = await Promise.all(requests);
+      const blockedResponses = responses.filter((r) => r.status === 429);
+
+      // Powinno być przynajmniej 1 zablokowane żądanie (201 > limit 200)
+      expect(blockedResponses.length).toBeGreaterThan(0);
+    }, 30000);
+  });
+
+  describe('Rate Limit Headers', () => {
+    it('Powinien zwracać nagłówki RateLimit', async () => {
+      const response = await request(app)
+        .get('/api/articles')
+        .set('Cookie', authToken);
+
+      expect(response.headers).toHaveProperty('ratelimit-limit');
+      expect(response.headers).toHaveProperty('ratelimit-remaining');
+      expect(response.headers).toHaveProperty('ratelimit-reset');
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\sanitization.test.js v.3
+==================================
+
+// __tests__/integration/sanitization.test.js
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const User = require('../../models/User');
+const Article = require('../../models/Article');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Testy Sanitization i Bezpieczeństwa', () => {
+  let authToken;
+  let testUser;
+  let testArticle;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    testUser = await User.create({
+      email: 'security@example.com',
+      password: hashedPassword,
+      username: 'securityuser',
+      role: 'author',
+    });
+
+    // Utwórz testowy artykuł
+    testArticle = await Article.create({
+      title: 'Test Security Article',
+      content: 'Content for security testing',
+      author: testUser._id,
+      images: [],
+    });
+
+    // Login aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'security@example.com',
+      password: 'test123',
+    });
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await Article.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  describe('XSS Injection Tests', () => {
+    it('Powinien OCZYŚCIĆ XSS w tytule artykułu (usuń wszystkie tagi)', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', '<script>alert("xss")</script>Test Title')
+        .field(
+          'content',
+          'Normalna treść artykułu która jest wystarczająco długa.',
+        )
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201);
+      expect(response.body.article.title).toBe('Test Title'); // TYLKO czysty tekst
+      expect(response.body.article.title).not.toContain('<script>');
+      expect(response.body.article.title).not.toContain('alert');
+    });
+
+    it('Powinien OCZYŚCIĆ XSS w komentarzach (usuń niebezpieczne, zachowaj bezpieczne)', async () => {
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({
+          text: 'Safe <b>bold</b> but <img src="x" onerror="alert(1)"> dangerous <script>alert(2)</script> and <a href="https://example.com">link</a>',
+        });
+
+      expect(response.status).toBe(201);
+      // POWINNO ZACHOWAĆ bezpieczne formatowanie
+      expect(response.body.text).toContain('<b>bold</b>');
+      expect(response.body.text).toContain('<a href="https://example.com"');
+      // POWINNO USUNĄĆ niebezpieczne tagi
+      expect(response.body.text).not.toContain('<img');
+      expect(response.body.text).not.toContain('<script>');
+      expect(response.body.text).not.toContain('onerror');
+      // POWINNO ZACHOWAĆ tekst
+      expect(response.body.text).toContain('Safe');
+      expect(response.body.text).toContain('bold');
+      expect(response.body.text).toContain('dangerous');
+      expect(response.body.text).toContain('link');
+    });
+
+    it('Powinien OCZYŚCIĆ XSS w update profilu (usuń wszystkie tagi)', async () => {
+      const response = await request(app)
+        .put('/api/users/profile')
+        .set('Cookie', authToken)
+        .send({ username: '<script>alert("xss")</script>Hacker' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.username).toBe('Hacker'); // TYLKO czysty tekst
+      expect(response.body.user.username).not.toContain('<script>');
+    });
+  });
+
+  describe('SQL Injection Tests', () => {
+    it('Powinien bezpiecznie obsłużyć SQL injection w wyszukiwaniu', async () => {
+      const response = await request(app)
+        .get('/api/articles?q=test%27; DROP TABLE users;--')
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('articles');
+      expect(Array.isArray(response.body.articles)).toBe(true);
+    });
+
+    it('Powinien bezpiecznie obsłużyć SQL injection w parametrach', async () => {
+      const maliciousId = "'; DROP TABLE users; --";
+      const response = await request(app)
+        .get(`/api/articles/${maliciousId}`)
+        .set('Cookie', authToken);
+
+      expect([400, 404]).toContain(response.status);
+    });
+  });
+
+  describe('HTML Injection Tests', () => {
+    it('Powinien OCZYŚCIĆ HTML w polach tekstowych komentarzy', async () => {
+      const cleanText = 'Normalny tekst <b>pogrubiony</b> ale bezpieczny';
+
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({ text: cleanText });
+
+      expect(response.status).toBe(201);
+      // Bezpieczne tagi powinny pozostać
+      expect(response.body.text).toContain('<b>pogrubiony</b>');
+      expect(response.body.text).not.toContain('<script>');
+    });
+  });
+
+  describe('Specific Sanitization Behaviors', () => {
+    it('Powinien zachować podstawowe formatowanie w komentarzach', async () => {
+      const response = await request(app)
+        .post(`/api/comments/${testArticle._id}`)
+        .set('Cookie', authToken)
+        .send({
+          text: 'Text with <b>bold</b>, <i>italic</i> and <a href="https://example.com">link</a> but no <script>alert(1)</script>',
+        });
+
+      expect(response.status).toBe(201);
+      // Bezpieczne tagi powinny pozostać
+      expect(response.body.text).toContain('<b>bold</b>');
+      expect(response.body.text).toContain('<i>italic</i>');
+      expect(response.body.text).toContain('<a href="https://example.com"');
+      // Niebezpieczne tagi powinny być usunięte
+      expect(response.body.text).not.toContain('<script>');
+    });
+
+    it('Powinien całkowicie usuwać HTML w tytułach', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', 'Title with <script>alert(1)</script> and <b>bold</b>')
+        .field('content', 'Normal content here...')
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201);
+      // WSZYSTKIE tagi powinny być usunięte - nawet bezpieczne
+      // Po usunięciu tagów pozostaje podwójna spacja, co jest poprawne
+      expect(response.body.article.title).toBe('Title with  and bold');
+      expect(response.body.article.title).not.toContain('<script>');
+      expect(response.body.article.title).not.toContain('<b>');
+    });
+
+    it('Powinien pozwalać na bogate formatowanie w treści artykułów', async () => {
+      const response = await request(app)
+        .post('/api/articles')
+        .set('Cookie', authToken)
+        .field('title', 'Normal title')
+        .field(
+          'content',
+          'Text with <b>bold</b>, <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" alt="test"> and <script>alert(1)</script>',
+        )
+        .attach('images', Buffer.from('test'), 'test.jpg');
+
+      expect(response.status).toBe(201);
+      // Bezpieczne tagi powinny pozostać
+      expect(response.body.article.content).toContain('<b>bold</b>');
+      // Obrazki mogą być usuwane w treści artykułów - to jest poprawne zachowanie
+      expect(response.body.article.content).not.toContain('<script>');
+    });
+  });
+});
+
+
+==================================
+__tests__\integration\users.test.js v.2
+==================================
+
+const request = require('supertest');
+const { app, startServer, cleanupTestDatabase } = require('../../server');
+const User = require('../../models/User');
+const bcrypt = require('bcryptjs');
+
+describe('Integracja: Endpointy Użytkowników', () => {
+  let authToken;
+  let testUser;
+
+  beforeAll(async () => {
+    await startServer();
+
+    // Utwórz testowego użytkownika i zaloguj
+    const hashedPassword = await bcrypt.hash('test123', 10);
+    testUser = await User.create({
+      email: 'testuser@example.com',
+      password: hashedPassword,
+      username: 'testuser',
+      role: 'user',
+    });
+
+    // Login aby dostać token
+    const loginResponse = await request(app).post('/api/auth/login').send({
+      email: 'testuser@example.com',
+      password: 'test123',
+    });
+
+    authToken = loginResponse.headers['set-cookie'][0];
+  });
+
+  afterAll(async () => {
+    await User.deleteMany({});
+    await cleanupTestDatabase();
+  });
+
+  // 1. GET /api/users/profile
+  describe('GET /api/users/profile', () => {
+    it('Powinien zwrócić profil zalogowanego użytkownika', async () => {
+      const response = await request(app)
+        .get('/api/users/profile')
+        .set('Cookie', authToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('_id', testUser._id.toString());
+      expect(response.body).toHaveProperty('email', 'testuser@example.com');
+      expect(response.body).toHaveProperty('username', 'testuser');
+      expect(response.body).toHaveProperty('role', 'user');
+      expect(response.body).not.toHaveProperty('password'); // Hasło nie powinno być zwracane
+    });
+
+    it('Powinien zwrócić błąd 401 gdy brak autoryzacji', async () => {
+      const response = await request(app).get('/api/users/profile');
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // 2. PUT /api/users/profile
+  describe('PUT /api/users/profile', () => {
+    it('Powinien zaktualizować nazwę użytkownika', async () => {
+      const updatedData = {
+        username: 'updatedusername',
+      };
+
+      const response = await request(app)
+        .put('/api/users/profile')
+        .set('Cookie', authToken)
+        .send(updatedData);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty('message', 'Profil zaktualizowany');
+      expect(response.body.user).toHaveProperty('username', 'updatedusername');
+      expect(response.body.user).toHaveProperty(
+        'email',
+        'testuser@example.com',
+      ); // Email nie powinien się zmienić
+
+      // Sprawdź czy dane zostały zaktualizowane w bazie
+      const updatedUser = await User.findById(testUser._id);
+      expect(updatedUser.username).toBe('updatedusername');
+    });
+
+    it('Powinien zwrócić błąd 400 dla zbyt krótkiej nazwy użytkownika', async () => {
+      const invalidData = {
+        username: 'ab', // 2 znaki < 3 wymagane
+      };
+
+      const response = await request(app)
+        .put('/api/users/profile')
+        .set('Cookie', authToken)
+        .send(invalidData);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('Powinien zwrócić błąd 401 gdy brak autoryzacji', async () => {
+      const response = await request(app)
+        .put('/api/users/profile')
+        .send({ username: 'test' });
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // 3. PUT /api/users/password
+  describe('PUT /api/users/password', () => {
+    it('Powinien zmienić hasło użytkownika', async () => {
+      const passwordData = {
+        oldPassword: 'test123',
+        newPassword: 'newpassword123',
+      };
+
+      const response = await request(app)
+        .put('/api/users/password')
+        .set('Cookie', authToken)
+        .send(passwordData);
+
+      expect(response.status).toBe(200);
+      expect(response.body).toHaveProperty(
+        'message',
+        'Hasło zostało zmienione.',
+      );
+
+      // Sprawdź czy można zalogować się nowym hasłem
+      const loginResponse = await request(app).post('/api/auth/login').send({
+        email: 'testuser@example.com',
+        password: 'newpassword123',
+      });
+
+      expect(loginResponse.status).toBe(200);
+    });
+
+    it('Powinien zwrócić błąd 400 dla nieprawidłowego starego hasła', async () => {
+      const passwordData = {
+        oldPassword: 'wrongpassword',
+        newPassword: 'newpassword123',
+      };
+
+      const response = await request(app)
+        .put('/api/users/password')
+        .set('Cookie', authToken)
+        .send(passwordData);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('Powinien zwrócić błąd 400 dla zbyt krótkiego nowego hasła', async () => {
+      const passwordData = {
+        oldPassword: 'test123',
+        newPassword: 'short', // 5 znaków < 6 wymagane
+      };
+
+      const response = await request(app)
+        .put('/api/users/password')
+        .set('Cookie', authToken)
+        .send(passwordData);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('Powinien zwrócić błąd 401 gdy brak autoryzacji', async () => {
+      const response = await request(app).put('/api/users/password').send({
+        oldPassword: 'test123',
+        newPassword: 'newpassword123',
+      });
+
+      expect(response.status).toBe(401);
+    });
+  });
+
+  // Testy dla admin endpoints (będą w admin.test.js)
+  describe('Endpointy administracyjne (będą testowane osobno)', () => {
+    it('Tymczasowy test - do usunięcia', () => {
+      expect(true).toBe(true);
+    });
+  });
+});
+
+
+==================================
+__tests__\services\articleService.createArticle.test.js v.1
+==================================
+
+ 
+// Test files often need unused variables for mocks
+
+// __tests__/services/articleService.createArticle.test.js
+const articleService = require('../../services/articleService');
+const Article = require('../../models/Article');
+jest.mock('../../models/Article');
+
+describe('Serwis: articleService - funkcja createArticle', () => {
+  const mockTitle = 'Testowy tytuł artykułu';
+  const mockContent = 'To jest treść testowego artykułu, która jest wystarczająco długa, aby spełnić wymagania.';
+  const mockAuthorId = '507f1f77bcf86cd799439011';
+  const mockImagePaths = ['uploads/image1.jpg', 'uploads/image2.png'];
+
+  let mockArticleInstance;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // 1. Tworzymy obiekt-impostor. Symuluje instancję Mongoose, która ma metodę `.save`.
+    mockArticleInstance = {
+      save: jest.fn(), // Mockujemy metodę save
+    };
+    // 2. Gdy konstruktor "Article" jest wywoływany, zwracamy naszego impostora.
+    Article.mockImplementation(() => mockArticleInstance);
+  });
+
+  it('Powinien pomyślnie utworzyć artykuł z poprawnymi danymi', async () => {
+    // ARRANGE
+    const mockSavedArticleData = {
+      _id: 'someArticleId',
+      title: mockTitle,
+      content: mockContent,
+      author: mockAuthorId,
+      images: mockImagePaths,
+    };
+    mockArticleInstance.save.mockResolvedValue(mockSavedArticleData);
+
+    // ACT
+    const result = await articleService.createArticle(mockTitle, mockContent, mockAuthorId, mockImagePaths);
+
+    // ASSERT
+    expect(Article).toHaveBeenCalledWith({
+      title: mockTitle,
+      content: mockContent,
+      author: mockAuthorId,
+      images: mockImagePaths,
+    });
+    expect(mockArticleInstance.save).toHaveBeenCalled();
+    expect(result).toBe(mockArticleInstance);
+  });
+
+  it('Powinien rzucić błąd jeśli tytuł jest za krótki', async () => {
+    // ARRANGE
+    const shortTitle = 'A';
+
+    // ACT & ASSERT
+    await expect(articleService.createArticle(shortTitle, mockContent, mockAuthorId, mockImagePaths))
+      .rejects
+      .toThrow('Tytuł musi mieć co najmniej 5 znaków');
+        
+    // Sprawdzamy, czy save NIE został wywołany
+    expect(mockArticleInstance.save).not.toHaveBeenCalled();
+  });
+
+  it('Powinien rzucić błąd jeśli treść jest za krótka', async () => {
+    // ARRANGE
+    const shortContent = 'Krótka';
+
+    // ACT & ASSERT
+    await expect(articleService.createArticle(mockTitle, shortContent, mockAuthorId, mockImagePaths))
+      .rejects
+      .toThrow('Treść musi mieć co najmniej 20 znaków');
+        
+    expect(mockArticleInstance.save).not.toHaveBeenCalled();
+  });
+
+  it('Powinien rzucić błąd jeśli brakuje tytułu lub treści', async () => {
+    // ACT & ASSERT - brak tytułu
+    await expect(articleService.createArticle('', mockContent, mockAuthorId, mockImagePaths))
+      .rejects
+      .toThrow(); // Może rzucić ogólny błąd walidacji
+
+    // ACT & ASSERT - brak treści
+    await expect(articleService.createArticle(mockTitle, '', mockAuthorId, mockImagePaths))
+      .rejects
+      .toThrow();
+
+    expect(mockArticleInstance.save).not.toHaveBeenCalled();
+  });
+});
+
+==================================

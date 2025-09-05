@@ -25,7 +25,7 @@ const excludeItems = [
 const outputName = 'Backend';
 const versionFile = path.join(process.cwd(), 'project_version.json');
 const fileHistoryDir = path.join(process.cwd(), 'history');
-const MAX_LINES_PER_FILE = 3000; // Maksymalna liczba linii na plik
+const MAX_LINES_PER_FILE = 2000;
 
 if (!fs.existsSync(fileHistoryDir))
   fs.mkdirSync(fileHistoryDir, { recursive: true });
