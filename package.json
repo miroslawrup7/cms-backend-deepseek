@@ -31,7 +31,10 @@
     "create-indexes": "node scripts/createIndexes.js",
     "create-indexes:prod": "NODE_ENV=production node scripts/createIndexes.js",
     "test:performance": "node scripts/performanceTest.js",
-    "test:performance:prod": "NODE_ENV=production node scripts/performanceTest.js"
+    "test:performance:prod": "NODE_ENV=production node scripts/performanceTest.js",
+    "backup": "node scripts/backup.js",
+    "backup:clean": "node scripts/backup.js --clean",
+    "backup:list": "node scripts/list-backups.js"
   },
   "keywords": [],
   "author": "",

@@ -175,6 +175,38 @@ const startServer = async () => {
     logger.info(`📦 Baza: ${conn.name}`);
     logger.info(`🌐 Host: ${conn.host}`);
 
+    // 🔄 BACKUP MANAGER - DODAJ TUTAJ
+    const backupManager = {
+      lastBackup: 0,
+      
+      async performBackup() {
+        const now = Date.now();
+        const hours24 = 24 * 60 * 60 * 1000;
+        
+        if (now - this.lastBackup > hours24) {
+          logger.info('🔄 Automatyczny backup...');
+          try {
+            const backupScript = require('./scripts/backup');
+            await backupScript.performBackup();
+            this.lastBackup = now;
+            logger.info('✅ Backup wykonany pomyślnie');
+          } catch (error) {
+            logger.error('❌ Błąd backupu:', error);
+          }
+        }
+      },
+    };
+
+    // Backup przy starcie (tylko production)
+    if (process.env.NODE_ENV === 'production' || process.env.NODE_ENV === 'development') {
+      await backupManager.performBackup();
+    }
+
+    // Co godzinę sprawdzaj czy czas na backup (tylko production)
+    if (process.env.NODE_ENV === 'production') {
+      setInterval(() => backupManager.performBackup(), 60 * 60 * 1000); // 1 godzina
+    }
+
     // Uruchom serwer tylko jeśli nie jesteśmy w testach
     if (process.env.NODE_ENV !== 'test') {
       app.listen(PORT, () => logger.info(`🚀 Serwer działa na porcie ${PORT}`));
